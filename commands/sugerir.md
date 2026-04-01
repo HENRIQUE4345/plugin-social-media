@@ -77,13 +77,22 @@ Leia estes arquivos simultaneamente:
 
 ## Passo 2 — Extrair os 3 insumos do cruzamento
 
+### REGRA DE FONTES (CRITICA)
+
+TODA informacao usada nos cruzamentos DEVE vir de um arquivo que voce LEU nesta sessao.
+- Tendencias: so do arquivo de radar lido no passo 1. NAO inventar tendencias.
+- Dados de engagement: so dos arquivos de analise lidos. NAO inventar numeros.
+- Se quiser adicionar algo que NAO esta nos arquivos (ex: Google Trends, noticia recente), marque como `[INFERIDO — verificar]` e explique de onde veio.
+- NUNCA apresentar informacao inferida como se fosse do radar.
+
 ### A) Tendencias quentes (do radar)
 
-Do radar, extraia uma lista compacta:
+Do radar LIDO NO PASSO 1, extraia uma lista compacta:
 
 ```
 TENDENCIAS QUENTES:
 1. [Tendencia] — apareceu em [N] perfis — engagement: [dados] — [por que esta quente]
+   Fonte: {{analises}}/YYYY-MM-DD-radar-semanal.md
 2. [Tendencia] — ...
 ```
 
@@ -91,6 +100,8 @@ Incluir:
 - Topicos que apareceram em 2+ perfis (sinal forte)
 - Virais inesperados (fora do padrao do perfil = tema com demanda latente)
 - Gaps: topicos que NENHUM perfil cobriu mas tem demanda (olhar comentarios/perguntas)
+
+**IMPORTANTE:** So listar tendencias que ESTAO NO ARQUIVO DO RADAR. Se o radar nao menciona um topico, ele NAO e tendencia confirmada.
 
 ### B) Lentes do criador (dos 42 topicos)
 
@@ -161,10 +172,21 @@ Ideias sem timing ficam no banco (nao descarta, so adia).
 ### 3C) Sessoes recentes — pepitas de autenticidade
 
 Busque `{{sessoes}}/*.md` dos ultimos 30 dias (pela data no nome).
+
+**PRIORIZAR sessoes tipo `download` e `brainstorm`** — estas costumam ter HISTORIAS CATALOGADAS
+(banco de conteudo com emocao, uso potencial, frase-chave). Procurar especificamente por:
+- Tabelas ou listas de "historias" ou "banco de conteudo" dentro das sessoes
+- Frases entre aspas que o {{criador}} falou (material autentico)
+- Momentos de vulnerabilidade ou virada
+
 Para cada sessao, extraia APENAS:
 - Historias reais com resultado concreto ("fiz X, deu Y")
 - Opinioes fortes com vivencia ("nao e teoria, eu vivo isso")
 - Bastidores/vulnerabilidade que conectam
+
+**PILAR PESSOAL (15%):** Garantir que pelo menos 3-4 pepitas sejam do pilar Pessoal
+(jornada, bastidores, relacoes, humor). Se nao encontrar nas sessoes recentes,
+buscar sessoes mais antigas (ate 60 dias) que tenham historias de vida catalogadas.
 
 Cruzar com tendencias: "essa historia da um angulo forte pra essa tendencia?"
 
@@ -174,9 +196,14 @@ Busque em `{{conhecimento}}/` por arquivos com tags que cruzem com pilares.
 Leia apenas atualizados nos ultimos 60 dias.
 Extrair dados, frameworks ou insights que ENRIQUECEM os angulos gerados.
 
-### 3E) Aplicar padrao de hook
+### 3E) Aplicar padrao de hook (com VARIEDADE)
 
-Para cada angulo gerado em 3A/3B/3C, escolher o padrao de hook que melhor funciona:
+Para cada angulo gerado em 3A/3B/3C, escolher o padrao de hook que melhor funciona.
+
+**REGRA DE VARIEDADE:** Maximo 2 angulos com o MESMO padrao de hook no cardapio inteiro.
+Se ja usou "Provocacao com substancia" 2x, o proximo angulo DEVE usar outro padrao.
+Distribuir entre todos os 7 padroes. Se perceber que esta repetindo a estrutura
+"Todo mundo faz X. Ninguem faz Y." — PARE e force um padrao diferente (storytelling, humor, numero, vulnerabilidade).
 
 ```
 ANGULO: "Engenharia de Contexto > Prompt Engineering"
@@ -301,7 +328,7 @@ Output estimado: [N] cortes editaveis
 - [ ] Gravacao com angulo de cruzamento (nao tema generico)?
 - [ ] 3 carrosseis com angulos distintos?
 - [ ] 5-7 TikTok nativos?
-- [ ] Pilares balanceados ~35/25/25/15 (+-5%)?
+- [ ] Pilares balanceados ~35/25/25/15 (+-5%)? (minimo 15% Pessoal — nao sacrificar)
 - [ ] Nenhum tema repetido de cardapios anteriores?
 - [ ] Cada item tem o cruzamento visivel (de onde veio)?
 - [ ] Pelo menos 50% dos angulos sao NOVOS (nao existiam no backlog)?
