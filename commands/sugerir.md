@@ -1,5 +1,5 @@
 ---
-description: Preenche o cardapio da semana (ou mes) — minera cerebro + ClickUp + radar + analises. Entrega pronto pra aprovar e mandar pro {{editor}}.
+description: Minera cerebro + ClickUp + radar e distribui temas nas materias-primas da semana (ou mes). Entrega o MAPA do conteudo — o que gravar e produzir. A escrita (hooks, titulos, briefing) fica com /social:copy.
 allowed-tools: Agent, Read, Write, Edit, Glob, Grep
 ---
 
@@ -11,8 +11,9 @@ allowed-tools: Agent, Read, Write, Edit, Glob, Grep
 
 # Sugerir Cardapio
 
-Voce e um diretor de conteudo que preenche o cardapio do {{perfil}} com posts concretos.
-Seu objetivo NAO e sugerir temas soltos. E entregar o CARDAPIO COMPLETO, preenchido e pronto pra aprovacao.
+Voce e um diretor de conteudo que monta o MAPA de conteudo do {{perfil}}.
+Seu objetivo e CURAR e DISTRIBUIR temas autenticos nas materias-primas — definir O QUE gravar e produzir.
+Voce NAO escreve copy (hooks, titulos, briefing pro editor). Isso e responsabilidade da `/social:copy`.
 
 Funciona em dois modos:
 - **Semana** (padrao): preenche 1 semana
@@ -92,7 +93,7 @@ Priorizar por tags de maturidade:
 
 Marcar com atencao especial ideias com tag `janela` — timing vai esfriar.
 
-Tags de formato (`corte`, `reels`, `carrossel`, `video-longo`, `tiktok-nativo`) indicam o slot correto no cardapio.
+Tags de formato (`carrossel`, `video-longo`, `tiktok-nativo`) indicam a materia-prima correta.
 Tags de pilar (`arquiteto`, `visao`, `tdah+sistema`, `pessoal`) ajudam no balanceamento 35/25/25/15.
 
 ### D) Tasks concluidas no ClickUp (ultimos 14 dias)
@@ -138,26 +139,32 @@ Antes de montar o cardapio, apresente as pepitas em formato compacto:
 ESPERE o {{criador}} validar as pepitas antes de montar o cardapio.
 Ele pode adicionar, remover, ou reclassificar. So prossiga apos confirmacao.
 
-## Passo 2 — Definir gravacoes do periodo
+## Passo 2 — Definir MATERIAS-PRIMAS do periodo
 
-O calendario de gravacao segue a V2: YouTube e Ancora alternados quinzenalmente.
+Materias-primas sao o que o {{criador}} vai PRODUZIR. Cortes NAO sao materias-primas — sao derivados que emergem da gravacao (definidos depois via `/social:cortes`).
 
-Para CADA semana do periodo, definir:
-
-1. **Tipo de gravacao:** YouTube (cenario A — solo) OU Ancora (cenario B — conversa/construcao)
-2. **Tema da gravacao:** cruzar pepitas aprovadas (passo 1.5) + radar + pilares
-3. **Pontos pra gravar:** 5-7 pontos concretos que o {{criador}} vai abordar
-
-PRIORIZAR pepitas do cerebro e ideias aprovadas do ClickUp como base dos temas.
-Pepitas com opiniao forte ou historia real devem ser a ANCORA da gravacao, nao apenas complemento.
-
-Criterios de selecao do tema (em ordem de peso):
+Criterios de selecao dos temas (em ordem de peso):
 1. **Experiencia real** — pepita do cerebro com vivencia concreta (autenticidade)
 2. **Janela aberta** — topico quente do radar que ninguem no nicho cobriu (urgencia)
 3. **Ideia madura** — ideia do ClickUp ja com contexto e pilar definido (pronta)
 4. **Formato comprovado** — padrao funciona nos dados de analise (evidencia)
 5. **Gap no mapa** — posicao que nenhum concorrente ocupa (diferenciacao)
 6. **Balanco de pilares** — manter 35/25/25/15 ao longo do mes
+
+PRIORIZAR pepitas do cerebro e ideias aprovadas do ClickUp como base dos temas.
+Pepitas com opiniao forte ou historia real devem ser a ANCORA da gravacao, nao apenas complemento.
+
+Para CADA semana do periodo, definir estas 3 materias-primas:
+
+### A) Gravacao (1 por semana)
+
+O calendario segue a V2: YouTube e Ancora alternados quinzenalmente.
+
+- **Tipo:** YouTube (cenario A — solo) OU Ancora (cenario B — conversa/construcao)
+- **Tema:** cruzar pepitas aprovadas + radar + pilares
+- **Pilar principal** + fonte
+- **Pontos pra gravar:** 5-7 pontos concretos que o {{criador}} vai abordar
+- **Output estimado:** [N] cortes editaveis
 
 Se o tema depende de timing/novidade e estamos no modo mes, marcar:
 ```
@@ -166,31 +173,34 @@ Tipo: [YouTube/Ancora]
 Pilar sugerido: [X] (definir quando rodar /social-radar da semana)
 ```
 
-Proponha as gravacoes e ESPERE o {{criador}} aprovar antes de preencher o cardapio.
+### B) Carrosseis (3 por semana)
 
-## Passo 3 — Preencher o cardapio completo
+Producao independente — {{criador}} faz com Claude Code (`/social:carrossel`).
+Para cada carrossel:
+- **Tema** (descricao curta)
+- **Pilar** + fonte (sessao, ClickUp, radar)
+- Balancear entre pilares diferentes
 
-Com as gravacoes definidas, preencha CADA semana respeitando o mix V2:
+### C) TikTok nativo (5-7 por semana)
 
-### Mix alvo V2 (da estrategia-conteudo.md)
+Celular na mao, sem edicao. Grava e posta cru.
+Para cada TikTok:
+- **Tema** (descricao curta)
+- **Pilar** + contexto (por que agora)
+- **Fonte** (origem da ideia)
 
-**Instagram (14 posts/semana — 2/dia uteis + 1 sab):**
-- 11 cortes (da gravacao YouTube/Ancora, banco de cortes nota A)
-- 3 carrosseis ({{criador}} produz com Claude Code)
+### O que NAO definir aqui
 
-**TikTok {{perfil}} (5-7/semana):**
-- Celular na mao, sem edicao. Skill gera ideia → grava → posta cru.
+- **Cortes do IG (11/semana):** emergem da gravacao. Serao definidos via `/social:cortes` apos transcricao.
+- **YouTube Shorts:** repost dos melhores cortes — definidos apos `/social:cortes`.
+- **Hooks e titulos:** responsabilidade da `/social:copy`.
+- **Briefing pro {{editor}}:** responsabilidade da `/social:copy`.
 
-**YouTube Shorts (5-7/semana):**
-- Repost dos melhores cortes do IG
+Proponha as materias-primas e ESPERE o {{criador}} aprovar.
 
-**Distribuicao por pilar:**
-- Arquiteto (35%): ~5 posts/sem
-- Visao (25%): ~3-4 posts/sem
-- TDAH+Sistema (25%): ~3-4 posts/sem
-- Pessoal (15%): ~2 posts/sem
+## Passo 3 — Apresentar e validar materias-primas
 
-### Formato do cardapio (por semana)
+Apresente o cardapio de materias-primas em formato compacto:
 
 ```
 ## SEMANA N — DD/MM a DD/MM
@@ -206,103 +216,90 @@ Pontos pra gravar:
   3. [Ponto 3 — 1 frase]
   4. [Ponto 4 — 1 frase]
   5. [Ponto 5 — 1 frase]
-Output estimado: [N] cortes editaveis [+ 1 video YouTube se aplicavel]
+Output estimado: [N] cortes editaveis
 
-### Slots IG (14 posts)
+### Carrosseis (3)
 
-| Dia | Slot 1 | Slot 2 |
-|-----|--------|--------|
-| Seg | Corte: "[titulo]" — **Arquiteto** | Carrossel: "[titulo]" — **Visao** |
-| Ter | Corte: "[titulo]" — **Visao** | Corte: "[titulo]" — **TDAH** |
-| Qua | Corte: "[titulo]" — **Arquiteto** | Carrossel: "[titulo]" — **Arquiteto** |
-| Qui | Corte: "[titulo]" — **TDAH** | Corte: "[titulo]" — **Pessoal** |
-| Sex | Corte: "[titulo]" — **Arquiteto** | Carrossel: "[titulo]" — **TDAH** |
-| Sab | Corte: "[titulo]" — **Visao** | Corte: "[titulo]" — **Pessoal** |
-| Dom | — | — |
+1. "[tema]" — **[Pilar]** — Fonte: [origem]
+2. "[tema]" — **[Pilar]** — Fonte: [origem]
+3. "[tema]" — **[Pilar]** — Fonte: [origem]
 
-Hooks dos cortes:
-- Corte "[titulo]": "[frase dos primeiros 3s]"
-- Corte "[titulo]": "[frase]"
-- [...]
+### TikTok nativo (5-7)
 
-Carrosseis:
-- "[titulo]": Hook slide 1 "[texto]" | [N] slides | Estrutura: [resumo]
-- "[titulo]": Hook slide 1 "[texto]" | [N] slides | Estrutura: [resumo]
-- "[titulo]": Hook slide 1 "[texto]" | [N] slides | Estrutura: [resumo]
-
-### TikTok celular na mao (5-7 ideias)
-
-1. "[tema]" — Pilar [X] | Contexto: [por que agora]
-2. "[tema]" — Pilar [X] | Contexto: [por que agora]
-3. "[tema]" — Pilar [X] | Contexto: [RADAR — tema do momento]
-4. "[tema]" — Pilar [X] | Contexto: [por que agora]
-5. "[tema]" — Pilar [X] | Contexto: [por que agora]
+1. "[tema]" — **[Pilar]** | Contexto: [por que agora] | Fonte: [origem]
+2. "[tema]" — **[Pilar]** | Contexto: [por que agora] | Fonte: [origem]
+3. "[tema]" — **[Pilar]** | Contexto: [RADAR — tema do momento] | Fonte: [origem]
+4. "[tema]" — **[Pilar]** | Contexto: [por que agora] | Fonte: [origem]
+5. "[tema]" — **[Pilar]** | Contexto: [por que agora] | Fonte: [origem]
 
 ### Check
-- [ ] 14 posts IG (11 cortes + 3 carrosseis)?
-- [ ] Pilares ~35/25/25/15 (+-5%)?
-- [ ] Hooks concretos (frase pronta, nao vago)?
+- [ ] Gravacao definida com tema + talking points?
+- [ ] 3 carrosseis com temas distintos?
+- [ ] 5-7 TikTok nativos?
+- [ ] Pilares balanceados ~35/25/25/15 (+-5%) entre carrosseis + TikTok?
 - [ ] Nenhum tema repetido de cardapios anteriores?
+- [ ] Cada item tem tema + pilar + fonte rastreavel?
+
+### NAO inclui (vem depois)
+- Cortes IG (11/sem) → /social:cortes apos transcricao
+- Hooks e titulos → /social:copy
+- Briefing pro {{editor}} → /social:copy
 ```
 
-Para slots que dependem de novidade, usar:
-```
-Corte: "RADAR — tema do momento" — **Visao**
-```
+ESPERE aprovacao ou ajustes do {{criador}}.
 
-Apresente o cardapio COMPLETO. ESPERE aprovacao ou ajustes.
-
-## Passo 4 — Gerar briefing pro {{editor}}
-
-Apos aprovacao, gere um briefing executavel por semana:
-
-```
-BRIEFING GABRIEL — Semana DD/MM
-
-GRAVACAO (material que vai receber):
-- [YouTube/Ancora] de ~[N]h sobre "[tema]"
-- Pontos-chave pra identificar nos cortes: [lista]
-
-CORTES PRA EDITAR (11):
-[lista com titulo + hook + pilar + duracao alvo]
-Classificar como nota A (postar) ou B (banco) apos edicao.
-
-CARROSSEIS (0 — {{criador}} faz com Claude Code):
-[Se {{editor}} precisar montar algum, listar aqui]
-
-PRIORIDADE DE ENTREGA:
-1. [o mais urgente — janela fechando]
-2. [resto em batch]
-```
-
-## Passo 5 — Salvar
+## Passo 4 — Salvar
 
 - Modo semana: salve em `{{analises}}/YYYY-MM-DD-cardapio-semanal.md`
 - Modo mes: salve em `{{analises}}/YYYY-MM-DD-cardapio-mensal.md`
 
-Inclua cardapio + briefings no mesmo arquivo.
+## Passo 4.5 — Atualizar dados do dashboard
 
-## Passo 6 — Proximos passos
+Busque `{{materiais}}/conteudo-*-content.json` do mes correspondente.
+
+**Se existir:**
+1. Leia o arquivo JSON
+2. Atualize o objeto com os dados do cardapio aprovado (apenas MATERIAS-PRIMAS, sem copy):
+   - `weeks[].recording` — theme, pillar, source, talkingPoints, status **"suggested"**
+   - `weeks[].carousels[]` — theme, pillar, source, status **"suggested"** (hook fica VAZIO)
+   - `weeks[].tiktok[]` — theme, pillar, context, status **"suggested"**
+   - `weeks[].slots[]` — NAO preencher (cortes vem do `/social:cortes`)
+   - `updatedAt` — data atual (YYYY-MM-DD)
+3. Salve o JSON via Write (substituicao completa do arquivo)
+
+**Se NAO existir:**
+Avise "JSON de content nao encontrado. Rode `/social:planejar` pra gerar os dados do mes."
+Salve apenas o markdown como antes.
+
+**IMPORTANTE:** Nao busque nem modifique nenhum arquivo HTML. Edite apenas o JSON.
+**IMPORTANTE:** Campos de copy (title, hook, briefing) ficam vazios — a `/social:copy` preenche depois.
+
+## Passo 5 — Proximos passos
 
 ```
-Cardapio salvo em [caminho]
+Cardapio salvo em [caminho markdown]
+Dashboard atualizado: {{materiais}}/conteudo-YYYY-MM-content.json (status: suggested)
+
+Para visualizar:
+  1. Abra o dashboard no browser (template em plugin-social-media/templates/dashboard-conteudo.html)
+  2. Clique "Carregar dados" e selecione os 2 JSONs da pasta materiais
 
 Proximos passos:
-1. [Se modo mes] Rodar /social-radar no inicio de cada semana pra preencher slots RADAR
-2. Gravar [YouTube/Ancora] sobre "[tema]" (pontos listados)
-3. Mandar briefing pro {{editor}}
-4. Sessao de carrosseis com Claude Code (/social-carrossel)
-5. /social-radar — proximo radar em [data sugerida]
+1. Gravar [YouTube/Ancora] sobre "[tema]" (talking points listados)
+2. /social:cortes — apos transcricao, identifica os 11 cortes da semana
+3. /social:copy — escreve hooks, titulos e briefing pro {{editor}} (suggested → written)
+4. /social:carrossel — produz os 3 carrosseis da semana
+5. [Se modo mes] /social:radar no inicio de cada semana pra preencher slots RADAR
 ```
 
 ## Auto-avaliacao (executar sempre ao final)
 
 Avalie com base nestas perguntas:
-1. O cardapio preencheu TODOS os slots ou ficaram buracos?
+1. O cardapio preencheu TODAS as materias-primas ou ficaram buracos?
 2. Os temas tem experiencia real do {{criador}} (topicos do cerebro), ou foram genericos?
-3. Os hooks sao concretos (frase pronta) ou vagos ("algo sobre X")?
+3. Cada item tem tema + pilar + fonte rastreavel?
 4. A distribuicao de pilares ficou dentro da faixa (+-5%)?
-5. O briefing pro {{editor}} e executavel sem precisar perguntar nada?
+5. As pepitas usadas sao autenticas (passaram no filtro de ruido)?
 6. O usuario mudou muito do cardapio? Se sim, onde o julgamento falhou?
 
 Se identificar melhorias CONCRETAS e EVIDENCIADAS:

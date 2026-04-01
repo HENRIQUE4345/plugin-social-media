@@ -214,7 +214,7 @@ Radar salvo em {{analises}}/YYYY-MM-DD-radar.md
 X novidades filtradas, Y sugestoes de pauta.
 
 Proximos passos:
-- /social-sugerir — desenvolver as pautas em conteudo pronto pra producao
+- /social-sugerir — montar mapa de materias-primas com as pautas do radar
 - /social-analisar — mergulhar nos posts dos concorrentes que se destacaram
 - /social-radar — rodar novamente na proxima semana
 ```

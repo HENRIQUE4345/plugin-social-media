@@ -407,14 +407,50 @@ Adicionar entrada no `## Historico de reviews`.
 
 ---
 
+## Passo final — Gerar dados do dashboard
+
+Apos salvar a estrategia, gere os JSONs do dashboard para o mes:
+
+1. Determine o mes-alvo (proximo mes, ou mes atual se ainda nao existe)
+2. Leia a estrategia recem-salva de `{{estrategia}}`
+3. Gere `{{materiais}}/conteudo-YYYY-MM-strategy.json` com:
+   - `$schema`: `"conteudo-strategy-v1"`
+   - `meta`: profile, creator, editor, month, period, strategyVersion, updatedAt
+   - `pillars`: array com id, label, pct, color, tagline, funnel, slotsPerWeek
+   - `weeklySlotTemplate`: array de slots (day, slot, format, pillar) baseado no mix semanal
+   - `mixTargets`: igTotal, igCortes, igCarrosseis, tiktokMin/Max, shortsMin/Max, youtubeLongPerMonth, stories
+   - `recordingCadence`: array com week, type (ancora/youtube), scenario, label
+   - `productionWeeks`: 4-5 semanas com gravar[], gabrielEntrega[], henriqueFaz[], publica[]
+   - `flywheel`: nodes[] e edges[] do content flywheel definido na estrategia
+4. Gere `{{materiais}}/conteudo-YYYY-MM-content.json` com:
+   - `$schema`: `"conteudo-content-v1"`
+   - `updatedAt`: data atual
+   - `weeks`: array com weekNum, dateRange, isPartial, recording{}, slots[], tiktok[], reels[], briefing{}
+     - `recording` de cada semana: type/scenario do recordingCadence, campos vazios, status "planned"
+     - `slots` de cada semana: gerar a partir do weeklySlotTemplate, campos vazios, status "planned"
+     - `tiktok`: 5 itens vazios por semana normal, 3 para semana parcial
+     - `reels`: 3 itens vazios por semana normal, 0 para semana parcial
+     - `briefing`: notes e deliveryDeadline vazios
+   - `bank`: { count: 0 }
+
+**IMPORTANTE:** Nao gere nem modifique nenhum arquivo HTML. Os dados vivem nos JSONs.
+O template visual esta em `plugin-social-media/templates/dashboard-conteudo.html`.
+
 ## Ao final (V1 ou Review)
 
 ```
 Estrategia salva em {{estrategia}}
+Dados do dashboard gerados:
+  - {{materiais}}/conteudo-YYYY-MM-strategy.json
+  - {{materiais}}/conteudo-YYYY-MM-content.json
+
+Para visualizar:
+  1. Abra o dashboard no browser (template em plugin-social-media/templates/dashboard-conteudo.html)
+  2. Clique "Carregar dados" e selecione os 2 JSONs da pasta materiais
 
 Proximos passos:
-- /social-sugerir — gerar pautas concretas baseadas nesta estrategia
-- /social-radar — curadoria de tendencias pra alimentar pautas
+- /social:sugerir — montar mapa de materias-primas (gravacao + carrosseis + TikTok)
+- /social:radar — curadoria de tendencias pra alimentar pautas
 - Review em [data] (30 dias)
 ```
 
