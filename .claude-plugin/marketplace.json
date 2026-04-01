@@ -1,0 +1,13 @@
+{
+  "name": "social-media-marketplace",
+  "owner": {
+    "name": "Henrique Carvalho"
+  },
+  "plugins": [
+    {
+      "name": "plugin-social-media",
+      "source": "./",
+      "description": "Gestao completa de conteudo para Instagram — analise, planejamento, producao, radar, triagem."
+    }
+  ]
+}

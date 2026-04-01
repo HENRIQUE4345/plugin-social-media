@@ -1,0 +1,25 @@
+{
+  "name": "plugin-social-media",
+  "version": "1.0.0",
+  "description": "Gestao completa de conteudo para Instagram — analise de concorrentes, planejamento, producao de carrossel, radar de tendencias, triagem de backlog.",
+  "author": {
+    "name": "Henrique Carvalho"
+  },
+  "keywords": [
+    "social-media",
+    "instagram",
+    "carrossel",
+    "conteudo",
+    "analise",
+    "tendencias",
+    "radar"
+  ],
+  "agents": [
+    "./agents/coletor-instagram.md",
+    "./agents/analista-visual.md",
+    "./agents/analista-video.md",
+    "./agents/estrategista-conteudo.md"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

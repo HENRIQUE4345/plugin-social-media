@@ -1,0 +1,3 @@
+*.local.md
+.env
+node_modules/
