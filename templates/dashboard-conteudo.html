@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Conteudo Social</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 235.99 172.75'%3E%3Cpath fill='%23efa54d' d='M234.6,80.05l-32.87,33.11c-23.99-21.31-129.22-14.61-102.2,11.92,10.02,11.27,4.11,23.22-11.34,36.28-5.81,4.91-12.65,8.54-20.06,10.26-27.14,6.3-49-13.36-11.28-69.82C109.2,23.49,11.17,59.86,0,64.2,31.82,41.48,68.21,27.32,111.8,25.62c11.85.28,14.2,3.96,7.99,17.11,16.61-11.05,1.25-28.37,22.88-42.72,4.89,7.05,8.79,14.36,28.8,20.74,26.37,4.28,38,18.14,42.63,27.38,6.54,14.61,3.03,13.65,18.05,21.27,3.71,1.88,5.13,7.42,2.44,10.66Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script>
+// ============================================================
+// DATA LAYER — loaded dynamically via file picker
+// ============================================================
+let STRATEGY = null;
+let CONTENT = null;
+</script>
+
+<style>
+/* ============================================================
+   DESIGN SYSTEM
+   ============================================================ */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --border-card: rgba(255, 255, 255, 0.07);
+  --accent: #E89430;
+  --accent-bright: #F0A840;
+  --accent-green: #34d399;
+  --accent-orange: #E89430;
+  --accent-red: #f87171;
+  --accent-blue: #60a5fa;
+  --accent-purple: #a78bfa;
+  --accent-yellow: #fbbf24;
+  --text-primary: #f5f0eb;
+  --text-secondary: #a09080;
+  --text-muted: #6b5e52;
+  --gradient-1: linear-gradient(135deg, #E89430 0%, #D07020 100%);
+  --header-h: 64px;
+  --tabs-h: 52px;
+  --summary-h: 44px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-card);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-profile {
+  font-size: 1.25rem; font-weight: 700; color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.header-month {
+  font-size: 0.9rem; color: var(--text-secondary); font-weight: 400;
+}
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-card);
+}
+.header-badge .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+
+/* ============================================================
+   HEADER ACTIONS (file picker)
+   ============================================================ */
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.load-btn {
+  padding: 6px 14px; border-radius: 8px;
+  font-family: inherit; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(232,148,48,0.1); border: 1px solid rgba(232,148,48,0.25);
+  color: var(--accent);
+}
+.load-btn:hover { background: rgba(232,148,48,0.2); }
+.export-btn {
+  padding: 6px 14px; border-radius: 8px;
+  font-family: inherit; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+  color: #34d399;
+}
+.export-btn:hover { background: rgba(52,211,153,0.2); }
+.cache-btn {
+  padding: 6px 14px; border-radius: 8px;
+  font-family: inherit; font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25);
+  color: #f87171;
+}
+.cache-btn:hover { background: rgba(248,113,113,0.2); }
+
+.welcome { text-align: center; padding: 80px 24px; max-width: 500px; margin: 0 auto; }
+.welcome h2 { font-size: 1.2rem; margin-bottom: 8px; }
+.welcome p { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.85rem; line-height: 1.6; }
+.welcome code { font-size: 0.75rem; color: var(--text-muted); display: block; margin: 4px 0; }
+.welcome .load-btn { font-size: 0.9rem; padding: 12px 32px; display: inline-block; }
+
+/* ============================================================
+   TAB BAR
+   ============================================================ */
+.tab-bar {
+  position: fixed; top: var(--header-h); left: 0; right: 0;
+  height: var(--tabs-h);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-card);
+  display: flex; align-items: stretch;
+  padding: 0 24px;
+  z-index: 99;
+  gap: 2px;
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 16px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-muted); font-family: inherit;
+  font-size: 0.8rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text-secondary); }
+.tab-btn.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+}
+.tab-icon { font-size: 1rem; opacity: 0.7; }
+.tab-btn.active .tab-icon { opacity: 1; }
+
+/* ============================================================
+   SUMMARY BAR
+   ============================================================ */
+.summary-bar {
+  position: fixed; top: calc(var(--header-h) + var(--tabs-h)); left: 0; right: 0;
+  height: var(--summary-h);
+  background: rgba(17,17,17,0.95);
+  border-bottom: 1px solid var(--border-card);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 24px;
+  z-index: 98;
+  font-size: 0.75rem; color: var(--text-secondary);
+  backdrop-filter: blur(8px);
+}
+.summary-item { display: flex; align-items: center; gap: 6px; }
+.summary-dot { width: 6px; height: 6px; border-radius: 50%; }
+.summary-val { font-weight: 600; color: var(--text-primary); }
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main {
+  margin-top: calc(var(--header-h) + var(--tabs-h) + var(--summary-h));
+  padding: 24px;
+  max-width: 1400px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* ============================================================
+   SHARED COMPONENTS
+   ============================================================ */
+
+/* Glass card */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: rgba(255,255,255,0.12); }
+
+/* Pillar badge */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 0.7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.pill-arquiteto { background: rgba(232,148,48,0.15); color: #E89430; }
+.pill-visao { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.pill-tdah { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.pill-pessoal { background: rgba(52,211,153,0.15); color: #34d399; }
+
+/* Format badge */
+.fmt-badge {
+  display: inline-flex; padding: 2px 8px; border-radius: 8px;
+  font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.fmt-corte { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+.fmt-carrossel { background: rgba(232,148,48,0.1); color: var(--accent); }
+
+/* Status dot + label */
+.status-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 0.7rem; font-weight: 500;
+  border: 1px solid var(--border-card);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer; transition: all 0.15s;
+  font-family: inherit; color: var(--text-secondary);
+}
+.status-btn:hover { background: rgba(255,255,255,0.06); }
+.status-btn .sdot { width: 7px; height: 7px; border-radius: 50%; }
+.status-planned .sdot { background: #555; }
+.status-recorded .sdot { background: var(--accent-orange); }
+.status-edited .sdot { background: var(--accent-blue); }
+.status-published .sdot { background: var(--accent-green); }
+
+/* Editable textarea */
+.editable {
+  width: 100%; background: transparent; border: 1px solid transparent;
+  border-radius: 6px; padding: 6px 8px;
+  color: var(--text-primary); font-family: inherit;
+  font-size: 0.85rem; resize: vertical; outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.4;
+}
+.editable:focus { border-color: var(--accent); background: rgba(255,255,255,0.02); }
+.editable::placeholder { color: var(--text-muted); }
+.editable-sm { font-size: 0.75rem; padding: 4px 6px; }
+.editable-title { font-size: 0.95rem; font-weight: 600; }
+
+/* Section title */
+.section-title {
+  font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+  color: var(--text-primary); letter-spacing: -0.01em;
+}
+
+/* Grid helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.flex-row { display: flex; gap: 12px; align-items: center; }
+.flex-col { display: flex; flex-direction: column; gap: 8px; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-8 { gap: 8px; }
+.gap-16 { gap: 16px; }
+.gap-24 { gap: 24px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+
+/* Stat card */
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+.stat-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.stat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+/* Week selector */
+.week-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+.week-btn {
+  padding: 8px 20px; border-radius: 8px;
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  color: var(--text-secondary); font-family: inherit;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.week-btn:hover { border-color: rgba(255,255,255,0.15); }
+.week-btn.active {
+  background: rgba(232,148,48,0.12); border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Recording card */
+.rec-card {
+  background: linear-gradient(135deg, rgba(232,148,48,0.06) 0%, rgba(232,148,48,0.02) 100%);
+  border: 1px solid rgba(232,148,48,0.15);
+  border-radius: 12px; padding: 20px;
+  margin-bottom: 20px;
+}
+.rec-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.rec-type-badge {
+  padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.rec-ancora { background: rgba(232,148,48,0.2); color: var(--accent); }
+.rec-youtube { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+
+/* Slot grid */
+.slot-grid {
+  display: grid; grid-template-columns: 60px 1fr 1fr;
+  gap: 8px;
+}
+.slot-day-label {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; min-height: 120px;
+}
+.slot-card {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: border-color 0.2s;
+  min-height: 120px;
+}
+.slot-card:hover { border-color: rgba(255,255,255,0.12); }
+.slot-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.slot-bottom { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+.slot-source {
+  font-size: 0.65rem; color: var(--text-muted); font-style: italic;
+}
+
+/* Flywheel — two-track layout */
+.flywheel { padding: 8px 0 4px; }
+.fw-tracks { display: flex; gap: 0; align-items: flex-start; }
+.fw-track-main { flex: 1.2; padding-right: 20px; }
+.fw-track-mid { flex: 0.9; padding: 0 20px; }
+.fw-track-tiktok { flex: 0.9; padding-left: 20px; }
+.fw-tracks-divider { width: 1px; background: rgba(255,255,255,0.07); align-self: stretch; flex-shrink: 0; }
+.fw-track-label {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-muted); text-align: center; margin-bottom: 10px;
+  padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+.fw-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 4px; }
+.fw-center { justify-content: center; }
+.fw-node {
+  padding: 7px 12px; border-radius: 8px;
+  font-size: 0.72rem; font-weight: 600;
+  text-align: center; line-height: 1.3;
+}
+.fw-node small { font-size: 0.58rem; font-weight: 400; opacity: 0.65; display: block; margin-top: 1px; }
+.fw-source { background: rgba(232,148,48,0.12); border: 1px solid rgba(232,148,48,0.3); color: var(--accent); }
+.fw-process { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: var(--text-primary); }
+.fw-grade-a { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); color: var(--accent-green); }
+.fw-grade-b { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: var(--accent-yellow); }
+.fw-grade-c { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--accent-red); }
+.fw-output { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); color: var(--accent-blue); }
+.fw-storage { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.18); color: var(--accent-yellow); }
+.fw-discard { background: rgba(248,113,113,0.05); border: 1px dashed rgba(248,113,113,0.18); color: var(--text-muted); }
+.fw-independent { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); color: var(--accent-purple); }
+.fw-reels { background: rgba(232,148,48,0.08); border: 1px solid rgba(232,148,48,0.2); color: var(--accent); }
+.fw-down { text-align: center; color: rgba(255,255,255,0.18); font-size: 0.85rem; line-height: 1; margin: 3px 0 2px; }
+.fw-down-label { text-align: center; font-size: 0.56rem; color: var(--text-muted); margin-bottom: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+.fw-grade-outputs { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.fw-direct-item { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; justify-content: center; }
+.fw-direct-col { flex-direction: column; gap: 4px; }
+.fw-direct-arrow { color: rgba(255,255,255,0.2); font-size: 1rem; flex-shrink: 0; }
+.fw-out-stack { display: flex; flex-direction: column; gap: 3px; }
+.fw-out-badge { font-size: 0.6rem; font-weight: 600; padding: 3px 7px; border-radius: 4px; white-space: nowrap; }
+.fw-out-ig { background: rgba(232,148,48,0.12); border: 1px solid rgba(232,148,48,0.25); color: var(--accent); }
+.fw-out-tk { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: #f87171; }
+.fw-out-yt { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); color: var(--accent-blue); }
+.fw-prod-block { display: flex; flex-direction: column; align-items: center; }
+.fw-plat-row { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+.fw-tk-paths { display: flex; align-items: center; gap: 6px; justify-content: center; }
+.fw-tk-path { display: flex; flex-direction: column; align-items: center; }
+.fw-tk-path-label { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.fw-tk-path-divider { font-size: 0.6rem; color: rgba(255,255,255,0.15); padding: 0 2px; margin-top: 10px; }
+.fw-sep-label {
+  text-align: center; font-size: 0.7rem; color: var(--text-muted);
+  margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* Roadmap / Gantt */
+.gantt-container { overflow-x: auto; }
+.gantt {
+  display: grid;
+  grid-template-columns: 100px repeat(24, 1fr);
+  gap: 2px;
+  min-width: 800px;
+}
+.gantt-header-cell {
+  padding: 8px 4px; text-align: center;
+  font-size: 0.65rem; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+}
+.gantt-row-label {
+  padding: 12px 8px; display: flex; flex-direction: column; gap: 2px;
+  font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+}
+.gantt-row-label small { font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
+.gantt-cell {
+  min-height: 48px; border-radius: 4px;
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.03);
+  position: relative;
+}
+.gantt-bar {
+  position: absolute; top: 4px; bottom: 4px; border-radius: 4px;
+  left: 0; right: 0;
+}
+.gantt-bar-rec { background: rgba(232,148,48,0.3); border: 1px solid rgba(232,148,48,0.5); }
+.gantt-bar-edit { background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); }
+.gantt-bar-pub { background: rgba(52,211,153,0.2); border: 1px solid rgba(52,211,153,0.4); }
+.gantt-legend { display: flex; gap: 20px; margin-top: 16px; }
+.gantt-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-secondary); }
+.gantt-legend-swatch { width: 16px; height: 10px; border-radius: 3px; }
+
+/* Pipeline Timeline */
+.pipeline-tl {
+  display: grid;
+  grid-template-columns: 115px repeat(30, 1fr);
+  gap: 2px;
+  min-width: 1020px;
+}
+.pt-hcell {
+  padding: 6px 2px 4px; text-align: center;
+  font-size: 0.58rem; font-weight: 600; color: var(--text-muted); line-height: 1.4;
+}
+.pt-hcell.pt-weekend { color: #E89430; opacity: 0.75; }
+.pt-hcell.pt-wkstart { border-left: 1px solid rgba(255,255,255,0.08); }
+.pt-row-label {
+  padding: 6px 8px; display: flex; align-items: center;
+  font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+}
+.pt-week-label {
+  text-align: center; font-size: 0.58rem; font-weight: 700; color: var(--text-muted);
+  padding: 3px 4px; border-left: 1px solid rgba(255,255,255,0.08); letter-spacing: 0.03em;
+  background: rgba(255,255,255,0.02); border-radius: 3px;
+}
+.pt-cell {
+  min-height: 44px; border-radius: 3px;
+  background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); position: relative;
+}
+.pt-cell.pt-wkstart { border-left: 1px solid rgba(255,255,255,0.1); }
+.pt-event {
+  position: absolute; inset: 2px; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center; padding: 2px; cursor: default;
+}
+.pt-range {
+  min-height: 44px; border-radius: 4px; display: flex; align-items: center;
+  padding: 4px 6px; margin: 2px 2px;
+}
+
+/* Carousel cards grid */
+.carousel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+
+/* TikTok filter */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 6px 16px; border-radius: 20px;
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  color: var(--text-secondary); font-family: inherit;
+  font-size: 0.75rem; font-weight: 500; cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: rgba(255,255,255,0.15); }
+.filter-btn.active { background: rgba(232,148,48,0.12); border-color: var(--accent); color: var(--accent); }
+
+/* TikTok list */
+.tiktok-item {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 10px; padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s;
+}
+.tiktok-item:hover { border-color: rgba(255,255,255,0.12); }
+
+/* Briefing section */
+.briefing-section {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+}
+.briefing-header {
+  padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; transition: background 0.2s;
+}
+.briefing-header:hover { background: rgba(255,255,255,0.02); }
+.briefing-body { padding: 0 20px 20px; }
+.briefing-collapsed .briefing-body { display: none; }
+.briefing-chevron {
+  transition: transform 0.2s; color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.briefing-collapsed .briefing-chevron { transform: rotate(-90deg); }
+
+/* Copy button */
+.copy-btn {
+  padding: 6px 14px; border-radius: 8px;
+  background: rgba(232,148,48,0.1); border: 1px solid rgba(232,148,48,0.25);
+  color: var(--accent); font-family: inherit;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(232,148,48,0.2); }
+
+/* Add button */
+.add-btn {
+  padding: 8px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.03); border: 1px dashed var(--border-card);
+  color: var(--text-muted); font-family: inherit;
+  font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  width: 100%; text-align: center;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  padding: 10px 24px; border-radius: 8px;
+  background: var(--accent); color: #000;
+  font-weight: 600; font-size: 0.85rem;
+  opacity: 0; transition: all 0.3s ease;
+  z-index: 200; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* Donut chart */
+.donut-container { position: relative; width: 120px; height: 120px; }
+.donut-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-label-big { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); display: block; }
+.donut-label-sm { font-size: 0.6rem; color: var(--text-muted); display: block; }
+
+/* Pillar bar */
+.pillar-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pillar-bar-label { width: 90px; font-size: 0.75rem; font-weight: 600; text-align: right; }
+.pillar-bar-track { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.04); position: relative; overflow: hidden; }
+.pillar-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.pillar-bar-target {
+  position: absolute; top: -2px; bottom: -2px; width: 2px; background: rgba(255,255,255,0.4);
+}
+.pillar-bar-pct { width: 40px; font-size: 0.7rem; color: var(--text-muted); }
+
+/* Week calendar cards */
+.week-cal-card {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 10px; padding: 16px; text-align: center;
+}
+.week-cal-num { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+.week-cal-type { font-size: 0.75rem; margin-top: 4px; }
+.week-cal-dates { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Production Calendar */
+.prod-cal-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.prod-cal-card {
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.prod-cal-header {
+  display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2px;
+}
+.prod-block {
+  border-radius: 7px; padding: 8px 10px;
+}
+.prod-block-record {
+  background: rgba(232,148,48,0.07); border: 1px solid rgba(232,148,48,0.15);
+}
+.prod-block-gabriel {
+  background: rgba(96,165,250,0.07); border: 1px solid rgba(96,165,250,0.15);
+}
+.prod-block-henrique {
+  background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.15);
+}
+.prod-block-publish {
+  background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.15);
+}
+.prod-publica-divider {
+  display: flex; align-items: center; gap: 6px;
+  margin: 8px 0 6px;
+}
+.prod-publica-divider-line {
+  flex: 1; height: 1px; background: rgba(52,211,153,0.15);
+}
+.prod-publica-divider-label {
+  font-size: 0.58rem; font-weight: 700; color: rgba(52,211,153,0.5);
+  text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+}
+.prod-plat-badge {
+  font-size: 0.53rem; font-weight: 600; padding: 2px 5px; border-radius: 3px;
+}
+.prod-plat-ig { background: rgba(232,148,48,0.15); color: var(--accent); border: 1px solid rgba(232,148,48,0.25); }
+.prod-plat-tk { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.22); }
+.prod-plat-shorts { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.22); }
+.prod-block-title {
+  font-size: 0.58rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 6px;
+}
+.prod-item-row {
+  display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px;
+}
+.prod-item-row:last-child { margin-bottom: 0; }
+.prod-qty-badge {
+  font-size: 0.65rem; font-weight: 800; min-width: 24px; height: 20px;
+  border-radius: 5px; border: 1px solid; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; padding: 0 4px;
+}
+
+/* Pillar select dropdown */
+.pillar-select {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-card);
+  border-radius: 8px; padding: 4px 8px;
+  color: var(--text-primary); font-family: inherit;
+  font-size: 0.75rem; cursor: pointer; outline: none;
+}
+.pillar-select:focus { border-color: var(--accent); }
+.pillar-select option { background: var(--bg-secondary); color: var(--text-primary); }
+
+/* Structure select */
+.struct-select {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-card);
+  border-radius: 8px; padding: 4px 8px;
+  color: var(--text-primary); font-family: inherit;
+  font-size: 0.75rem; cursor: pointer; outline: none;
+}
+.struct-select:focus { border-color: var(--accent); }
+.struct-select option { background: var(--bg-secondary); color: var(--text-primary); }
+
+/* Slide count input */
+.slide-input {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-card);
+  border-radius: 8px; padding: 4px 8px; width: 50px;
+  color: var(--text-primary); font-family: inherit;
+  font-size: 0.8rem; text-align: center; outline: none;
+}
+.slide-input:focus { border-color: var(--accent); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .slot-grid { grid-template-columns: 50px 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .grid-4 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .slot-grid { grid-template-columns: 1fr; }
+  .slot-day-label { min-height: auto; padding: 8px 0; }
+  .tab-bar { overflow-x: auto; }
+  .main { padding: 16px; }
+  .carousel-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <span class="header-profile">Dashboard</span>
+    <span class="header-month">Conteudo Social</span>
+  </div>
+  <div class="header-right">
+    <div class="header-actions" id="headerActions">
+      <label class="load-btn" for="jsonPicker">Carregar dados</label>
+      <input type="file" id="jsonPicker" multiple accept=".json" style="display:none" onchange="handleFiles(this.files)">
+      <button class="export-btn" onclick="exportJSON()" style="display:none" id="exportBtn">Exportar JSON</button>
+      <button class="cache-btn" onclick="clearCache()" title="Limpa cache local e recarrega">Limpar cache</button>
+    </div>
+    <div id="headerStats"></div>
+  </div>
+</header>
+
+<!-- TAB BAR -->
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="visao">
+    <span class="tab-icon">&#9670;</span> Visao Geral
+  </button>
+  <button class="tab-btn" data-tab="roadmap">
+    <span class="tab-icon">&#9654;</span> Roadmap
+  </button>
+  <button class="tab-btn" data-tab="ancora">
+    <span class="tab-icon">&#9673;</span> Ancora
+  </button>
+  <button class="tab-btn" data-tab="youtube">
+    <span class="tab-icon">&#9655;</span> YouTube
+  </button>
+  <button class="tab-btn" data-tab="reels">
+    <span class="tab-icon">&#9654;</span> Reels
+  </button>
+  <button class="tab-btn" data-tab="carrosseis">
+    <span class="tab-icon">&#9640;</span> Carrosseis
+  </button>
+  <button class="tab-btn" data-tab="tiktok">
+    <span class="tab-icon">&#9835;</span> TikTok
+  </button>
+  <button class="tab-btn" data-tab="briefing">
+    <span class="tab-icon">&#9993;</span> Briefing
+  </button>
+</nav>
+
+<!-- SUMMARY BAR -->
+<div class="summary-bar" id="summaryBar"></div>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainContent"></main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// FILE LOADING + EXPORT
+// ============================================================
+function handleFiles(fileList) {
+  const files = Array.from(fileList);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.$schema === 'conteudo-strategy-v1') {
+          STRATEGY = data;
+        } else if (data.$schema === 'conteudo-content-v1') {
+          CONTENT = data;
+        } else {
+          showToast('JSON nao reconhecido: ' + file.name);
+          return;
+        }
+        if (STRATEGY && CONTENT) {
+          document.getElementById('tabBar').style.display = '';
+          document.getElementById('summaryBar').style.display = '';
+          document.getElementById('exportBtn').style.display = '';
+          loadFromStorage();
+          renderView();
+          updateHeaderDynamic();
+          showToast('Dados carregados!');
+        } else if (STRATEGY && !CONTENT) {
+          showToast('Strategy OK — agora carregue o content JSON.');
+        } else if (CONTENT && !STRATEGY) {
+          showToast('Content OK — agora carregue o strategy JSON.');
+        }
+      } catch (err) {
+        showToast('Erro ao ler ' + file.name + ': JSON invalido');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+function updateHeaderDynamic() {
+  if (!STRATEGY) return;
+  document.querySelector('.header-profile').textContent = STRATEGY.meta.profile;
+  const months = ['','Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m] = STRATEGY.meta.month.split('-');
+  document.querySelector('.header-month').textContent = months[parseInt(m)] + ' ' + y;
+}
+
+function clearCache() {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('social-dashboard'));
+  keys.forEach(k => localStorage.removeItem(k));
+  STRATEGY = null;
+  CONTENT = null;
+  showToast(keys.length ? 'Cache limpo! (' + keys.length + ' entradas) Carregue os JSONs novamente.' : 'Nenhum cache encontrado.');
+  location.reload();
+}
+
+function exportJSON() {
+  if (!CONTENT || !STRATEGY) return;
+  CONTENT.updatedAt = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(CONTENT, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'conteudo-' + STRATEGY.meta.month + '-content.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON exportado!');
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let currentTab = localStorage.getItem('dashboard-tab') || 'visao';
+if (currentTab === 'cardapio' || currentTab === 'gravacoes') currentTab = 'visao';
+let tiktokFilter = 'all';
+let reelsFilter = 'all';
+function getStorageKey() {
+  return STRATEGY ? 'social-dashboard-' + STRATEGY.meta.month : null;
+}
+const STATUS_LIST = ['planned', 'recorded', 'edited', 'published'];
+const STATUS_LABELS = { planned: 'Planejado', recorded: 'Gravado', edited: 'Editado', published: 'Publicado' };
+const STATUS_COLORS = { planned: '#555', recorded: '#E89430', edited: '#60a5fa', published: '#34d399' };
+const DAYS_FULL = { Seg: 'Segunda', Ter: 'Terca', Qua: 'Quarta', Qui: 'Quinta', Sex: 'Sexta', Sab: 'Sabado' };
+
+let saveTimer = null;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderView();
+  setupTabListeners();
+});
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function saveToStorage() {
+  const key = getStorageKey();
+  if (key) localStorage.setItem(key, JSON.stringify({ content: CONTENT, ts: Date.now() }));
+}
+
+function debouncedSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToStorage, 300);
+}
+
+function loadFromStorage() {
+  const key = getStorageKey();
+  if (!key) return;
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.content && parsed.content.weeks) {
+        // Deep merge weeks
+        parsed.content.weeks.forEach((w, wi) => {
+          if (CONTENT.weeks[wi]) {
+            // Merge recording
+            if (w.recording) Object.assign(CONTENT.weeks[wi].recording, w.recording);
+            // Merge slots
+            if (w.slots) {
+              w.slots.forEach((s, si) => {
+                if (CONTENT.weeks[wi].slots[si]) Object.assign(CONTENT.weeks[wi].slots[si], s);
+              });
+            }
+            // Merge tiktok
+            if (w.tiktok) {
+              // Could have extra items
+              CONTENT.weeks[wi].tiktok = w.tiktok;
+            }
+            // Merge briefing
+            if (w.briefing) Object.assign(CONTENT.weeks[wi].briefing, w.briefing);
+          }
+        });
+        if (parsed.content.bank) CONTENT.bank = parsed.content.bank;
+      }
+    }
+  } catch (e) { console.warn('Failed to load from storage', e); }
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function setupTabListeners() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  localStorage.setItem('dashboard-tab', tabId);
+  renderView();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getPillarColor(id) {
+  const p = STRATEGY.pillars.find(p => p.id === id);
+  return p ? p.color : '#555';
+}
+
+function getPillarLabel(id) {
+  const p = STRATEGY.pillars.find(p => p.id === id);
+  return p ? p.label : id;
+}
+
+function allSlots() {
+  return CONTENT.weeks.flatMap(w => w.slots);
+}
+
+function allTiktoks() {
+  return CONTENT.weeks.flatMap(w => w.tiktok);
+}
+
+function countFilled(slots) {
+  return slots.filter(s => s.title && s.title.trim() !== '').length;
+}
+
+function countByStatus(items, status) {
+  return items.filter(i => i.status === status).length;
+}
+
+function countByPillar(slots, pillarId) {
+  return slots.filter(s => s.pillar === pillarId).length;
+}
+
+function countFilledByPillar(slots, pillarId) {
+  return slots.filter(s => s.pillar === pillarId && s.title && s.title.trim() !== '').length;
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Copiado!')).catch(() => showToast('Erro ao copiar'));
+}
+
+// ============================================================
+// HEADER STATS
+// ============================================================
+function updateHeaderStats() {
+  const all = allSlots();
+  const cortes = all.filter(s => s.format === 'corte');
+  const carrosseis = all.filter(s => s.format === 'carrossel');
+  const tiktoks = allTiktoks();
+
+  const filledAll = countFilled(all);
+  const pubAll = countByStatus(all, 'published');
+
+  const el = document.getElementById('headerStats');
+  el.innerHTML = `
+    <div class="header-badge"><span class="dot" style="background:${STATUS_COLORS.published}"></span> ${pubAll} publicados</div>
+    <div class="header-badge"><span class="dot" style="background:${STATUS_COLORS.edited}"></span> ${countByStatus(all, 'edited')} editados</div>
+    <div class="header-badge"><span class="dot" style="background:var(--accent)"></span> ${filledAll}/${all.length} preenchidos</div>
+  `;
+}
+
+// ============================================================
+// SUMMARY BAR
+// ============================================================
+function updateSummaryBar() {
+  const bar = document.getElementById('summaryBar');
+  const all = allSlots();
+  const tiktoks = allTiktoks();
+
+  let items = [];
+  switch (currentTab) {
+    case 'visao':
+      items = [
+        { color: var_accent(), label: 'IG Posts', val: `${countFilled(all)}/${all.length}` },
+        { color: '#34d399', label: 'Publicados', val: countByStatus(all, 'published') },
+        { color: '#60a5fa', label: 'Editados', val: countByStatus(all, 'edited') },
+        { color: '#a78bfa', label: 'TikToks', val: `${tiktoks.filter(t=>t.theme).length}/${tiktoks.length}` }
+      ];
+      break;
+    case 'roadmap':
+      items = [
+        { color: '#E89430', label: 'Gravacoes', val: `${CONTENT.weeks.filter(w=>w.recording.status!=='planned').length}/4` },
+        { color: '#60a5fa', label: 'Semanas ativas', val: CONTENT.weeks.length },
+        { color: '#34d399', label: 'Periodo', val: STRATEGY.meta.period }
+      ];
+      break;
+    case 'ancora': {
+      const ancW = CONTENT.weeks.filter(w => w.recording.type === 'ancora');
+      items = [
+        { color: '#E89430', label: 'Gravacoes Ancora', val: ancW.length },
+        { color: '#34d399', label: 'Preparadas', val: ancW.filter(w => w.recording.status !== 'planned').length },
+        { color: '#60a5fa', label: 'Cortes estimados', val: ancW.reduce((s, w) => s + w.recording.estimatedCuts, 0) }
+      ];
+      break;
+    }
+    case 'youtube': {
+      const ytW = CONTENT.weeks.filter(w => w.recording.type === 'youtube');
+      items = [
+        { color: '#f87171', label: 'Gravacoes YouTube', val: ytW.length },
+        { color: '#34d399', label: 'Preparadas', val: ytW.filter(w => w.recording.status !== 'planned').length },
+        { color: '#60a5fa', label: 'Cortes estimados', val: ytW.reduce((s, w) => s + w.recording.estimatedCuts, 0) }
+      ];
+      break;
+    }
+    case 'reels': {
+      const allReels = CONTENT.weeks.flatMap(w => w.reels || []);
+      items = [
+        { color: '#f472b6', label: 'Total', val: allReels.length },
+        { color: '#34d399', label: 'Preenchidos', val: allReels.filter(r => r.theme).length },
+        { color: '#60a5fa', label: 'Editados', val: allReels.filter(r => r.status === 'edited' || r.status === 'published').length }
+      ];
+      break;
+    }
+    case 'carrosseis': {
+      const car = all.filter(s => s.format === 'carrossel');
+      items = [
+        { color: '#E89430', label: 'Total', val: car.length },
+        { color: '#34d399', label: 'Preenchidos', val: countFilled(car) },
+        { color: '#60a5fa', label: 'Publicados', val: countByStatus(car, 'published') }
+      ];
+      break;
+    }
+    case 'tiktok':
+      items = [
+        { color: '#a78bfa', label: 'Total', val: tiktoks.length },
+        { color: '#34d399', label: 'Preenchidos', val: tiktoks.filter(t=>t.theme).length },
+        { color: '#E89430', label: 'Meta/semana', val: `${STRATEGY.mixTargets.tiktokMin}-${STRATEGY.mixTargets.tiktokMax}` }
+      ];
+      break;
+    case 'briefing':
+      items = [
+        { color: '#E89430', label: 'Editor', val: STRATEGY.meta.editor },
+        { color: '#60a5fa', label: 'Semanas', val: CONTENT.weeks.length },
+        { color: '#34d399', label: 'Versao', val: STRATEGY.meta.strategyVersion }
+      ];
+      break;
+  }
+
+  bar.innerHTML = items.map(i => `
+    <div class="summary-item">
+      <span class="summary-dot" style="background:${i.color}"></span>
+      <span>${i.label}:</span>
+      <span class="summary-val">${i.val}</span>
+    </div>
+  `).join('');
+}
+
+function var_accent() { return '#E89430'; }
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function renderView() {
+  const main = document.getElementById('mainContent');
+  if (!STRATEGY || !CONTENT) {
+    renderWelcome(main);
+    return;
+  }
+  switch (currentTab) {
+    case 'visao': renderVisaoGeral(main); break;
+    case 'roadmap': renderRoadmap(main); break;
+    case 'ancora': renderAncora(main); break;
+    case 'youtube': renderYoutube(main); break;
+    case 'reels': renderReels(main); break;
+    case 'carrosseis': renderCarrosseis(main); break;
+    case 'tiktok': renderTiktok(main); break;
+    case 'briefing': renderBriefing(main); break;
+  }
+  // Update tab styles
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === currentTab);
+  });
+  updateSummaryBar();
+  updateHeaderStats();
+}
+
+function renderWelcome(main) {
+  document.getElementById('tabBar').style.display = 'none';
+  document.getElementById('summaryBar').style.display = 'none';
+  document.getElementById('headerStats').innerHTML = '';
+  main.innerHTML = '<div class="welcome">' +
+    '<div style="font-size:2.5rem;margin-bottom:16px;opacity:0.6">&#9670;</div>' +
+    '<h2>Dashboard de Conteudo</h2>' +
+    '<p>Carregue os 2 arquivos JSON para visualizar o dashboard.' +
+    '<code>conteudo-YYYY-MM-strategy.json</code>' +
+    '<code>conteudo-YYYY-MM-content.json</code></p>' +
+    '<label class="load-btn" for="jsonPicker">Carregar dados</label>' +
+    '</div>';
+}
+
+// ============================================================
+// TAB 1: VISAO GERAL
+// ============================================================
+function renderVisaoGeral(main) {
+  const all = allSlots();
+  const tiktoks = allTiktoks();
+
+  // Totais fixos do mes (baseados no STRATEGY.productionWeeks)
+  const totalReels = 12;      // 3 Reels x 4 semanas
+  const totalCarrosseis = 15; // 3 Carrosseis x 5 semanas (incluindo sem5)
+  const totalCortes = 43;     // 11 Ancora + 8 YT + 11 Ancora + 8 YT + 3 Reels editados sem5
+  const totalTikToks = 20;    // 5 TikToks x 4 semanas
+
+  // Progresso baseado em status dos recordings e slots
+  const reelsGravados = CONTENT.weeks.filter(w => w.recording.status !== 'planned').length * 3;
+  const carrosseisFeitos = all.filter(s => s.format === 'carrossel' && s.status !== 'planned').length;
+  const cortesEntregues = CONTENT.weeks.filter(w => w.recording.status === 'edited' || w.recording.status === 'published').length * 8;
+  const tiktoksFeitos = tiktoks.filter(t => t.status === 'published').length;
+
+  let html = '';
+
+  // Stat cards
+  html += '<div class="grid-4 mb-16">';
+  html += statCard('Reels produzidos', reelsGravados, totalReels, '#E89430');
+  html += statCard('Carrosseis', carrosseisFeitos, totalCarrosseis, '#a78bfa');
+  html += statCard('Cortes Gabriel', cortesEntregues, totalCortes, '#60a5fa');
+  html += statCard('TikToks nativos', tiktoksFeitos, totalTikToks, '#34d399');
+  html += '</div>';
+
+  // Pillar distribution + donut
+  html += '<div class="grid-2 mb-16">';
+
+  // Bars
+  html += '<div class="card"><div class="section-title">Distribuicao por Pilar</div>';
+  const filledTotal = countFilled(all);
+  STRATEGY.pillars.forEach(p => {
+    const filledForPillar = countFilledByPillar(all, p.id);
+    const actualPct = filledTotal > 0 ? Math.round((filledForPillar / filledTotal) * 100) : p.pct;
+    const barWidth = filledTotal > 0 ? actualPct : p.pct;
+    const label = filledTotal > 0 ? `${actualPct}% <span style="color:var(--text-muted);font-size:0.65rem">/ meta ${p.pct}%</span>` : `${p.pct}%`;
+    html += `
+      <div class="pillar-bar-row">
+        <div class="pillar-bar-label" style="color:${p.color}">${p.label}</div>
+        <div class="pillar-bar-track">
+          <div class="pillar-bar-fill" style="width:${barWidth}%;background:${p.color}"></div>
+          ${filledTotal > 0 ? `<div class="pillar-bar-target" style="left:${p.pct}%"></div>` : ''}
+        </div>
+        <div class="pillar-bar-pct">${label}</div>
+      </div>`;
+  });
+  html += '</div>';
+
+  // Donut
+  html += '<div class="card" style="display:flex;align-items:center;justify-content:center;gap:32px;">';
+  const totalSlots = all.length;
+  const donutSegments = [];
+  let cumPct = 0;
+  STRATEGY.pillars.forEach(p => {
+    const totalForPillar = countByPillar(all, p.id);
+    const pct = totalSlots > 0 ? (totalForPillar / totalSlots) * 100 : 0;
+    donutSegments.push(`${p.color} ${cumPct}% ${cumPct + pct}%`);
+    cumPct += pct;
+  });
+  if (cumPct < 100) donutSegments.push(`rgba(255,255,255,0.05) ${cumPct}% 100%`);
+  const conicGrad = `conic-gradient(${donutSegments.join(', ')})`;
+
+  html += `<div class="donut-container" style="background:${conicGrad};border-radius:50%;display:flex;align-items:center;justify-content:center;">
+    <div style="width:70px;height:70px;border-radius:50%;background:var(--bg-primary);display:flex;align-items:center;justify-content:center;">
+      <div class="donut-label"><span class="donut-label-big">${totalSlots}</span><span class="donut-label-sm">slots</span></div>
+    </div>
+  </div>`;
+
+  // Legend
+  html += '<div class="flex-col gap-8">';
+  STRATEGY.pillars.forEach(p => {
+    html += `<div class="flex-row gap-8"><span style="width:10px;height:10px;border-radius:2px;background:${p.color};display:inline-block;"></span>
+      <span style="font-size:0.8rem;color:var(--text-secondary)">${p.label} (${p.pct}%)</span></div>`;
+  });
+  html += '</div></div>';
+
+  html += '</div>';
+
+  // Flywheel — two-track layout
+  html += '<div class="card mb-16">';
+  html += '<div class="section-title">Content Flywheel</div>';
+  html += '<div class="flywheel"><div class="fw-tracks">';
+
+  // ---- TRACK 1: Pipeline de cortes ----
+  html += '<div class="fw-track-main">';
+  html += '<div class="fw-track-label">Pipeline de cortes</div>';
+
+  // Sources
+  html += '<div class="fw-row">';
+  html += '<div class="fw-node fw-source">YouTube<small>~8 cortes</small></div>';
+  html += '<div class="fw-node fw-source">Ancora<small>~14-25 cortes</small></div>';
+  html += '</div>';
+
+  html += '<div class="fw-down">↓</div>';
+  html += '<div class="fw-down-label">Gabriel edita</div>';
+
+  // Cortes brutos
+  html += '<div class="fw-row fw-center"><div class="fw-node fw-process">Cortes brutos</div></div>';
+
+  html += '<div class="fw-down">↓</div>';
+  html += '<div class="fw-down-label">Classificacao</div>';
+
+  // Grading
+  html += '<div class="fw-row">';
+  html += '<div class="fw-node fw-grade-a">Nota A<small>30%</small></div>';
+  html += '<div class="fw-node fw-grade-b">Nota B<small>50%</small></div>';
+  html += '<div class="fw-node fw-grade-c">Nota C<small>20%</small></div>';
+  html += '</div>';
+
+  html += '<div class="fw-down">↓</div>';
+
+  // Outputs
+  html += '<div class="fw-row">';
+  html += '<div class="fw-grade-outputs"><div class="fw-node fw-output" style="font-size:0.65rem;padding:5px 10px">Post IG</div><div class="fw-node fw-output" style="font-size:0.65rem;padding:5px 10px">YT Shorts</div></div>';
+  html += '<div class="fw-node fw-storage">Banco</div>';
+  html += '<div class="fw-node fw-discard">Descarta</div>';
+  html += '</div>';
+
+  html += '</div>'; // fw-track-main
+
+  // Divider
+  html += '<div class="fw-tracks-divider"></div>';
+
+  // ---- TRACK 2: Producao editada (Reels + Carrosseis) ----
+  html += '<div class="fw-track-mid">';
+  html += '<div class="fw-track-label">Producao editada</div>';
+
+  // Reels produzidos
+  html += '<div class="fw-prod-block">';
+  html += '<div class="fw-node fw-reels" style="font-size:0.65rem;width:100%;box-sizing:border-box">Reels produzidos<small>Cenario A — estudio</small></div>';
+  html += '<div class="fw-down" style="margin:4px 0 2px">↓</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-ig">IG</span><span class="fw-out-badge fw-out-tk">TikTok</span><span class="fw-out-badge fw-out-yt">Shorts</span></div>';
+  html += '</div>';
+
+  // Separator between the two
+  html += '<div style="border-top:1px dashed rgba(255,255,255,0.05);margin:10px 0"></div>';
+
+  // Carrosseis
+  html += '<div class="fw-prod-block">';
+  html += '<div class="fw-node fw-independent" style="font-size:0.65rem;width:100%;box-sizing:border-box">Carrosseis<small>Claude Code + Henrique</small></div>';
+  html += '<div class="fw-down" style="margin:4px 0 2px">↓</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-ig">IG</span><span class="fw-out-badge fw-out-tk">TikTok</span></div>';
+  html += '</div>';
+
+  html += '</div>'; // fw-track-mid
+
+  html += '<div class="fw-tracks-divider"></div>';
+
+  // ---- TRACK 3: TikTok celular ----
+  html += '<div class="fw-track-tiktok">';
+  html += '<div class="fw-track-label">TikTok nativo</div>';
+
+  html += '<div class="fw-prod-block">';
+  html += '<div class="fw-node fw-independent" style="font-size:0.65rem;width:100%;box-sizing:border-box">TikTok celular<small>Gravado cru, sem edicao</small></div>';
+  html += '<div class="fw-down" style="margin:4px 0 2px">↓</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-tk">TikTok</span></div>';
+  html += '</div>';
+
+  html += '<div style="border-top:1px dashed rgba(255,255,255,0.05);margin:10px 0"></div>';
+
+  // Melhores performers — 3 caminhos
+  html += '<div class="fw-prod-block">';
+  html += '<div style="font-size:0.6rem;color:var(--text-muted);text-align:center;margin-bottom:8px;font-style:italic">melhores performers</div>';
+  html += '<div class="fw-tk-paths">';
+
+  html += '<div class="fw-tk-path">';
+  html += '<span class="fw-tk-path-label">repost</span>';
+  html += '<div style="font-size:0.52rem;color:var(--text-muted);text-align:center;margin:2px 0 4px">como esta</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-ig">IG</span><span class="fw-out-badge fw-out-yt">Shorts</span></div>';
+  html += '</div>';
+
+  html += '<div class="fw-tk-path-divider">ou</div>';
+
+  html += '<div class="fw-tk-path">';
+  html += '<span class="fw-tk-path-label">reeditar</span>';
+  html += '<div style="font-size:0.52rem;color:var(--text-muted);text-align:center;margin:2px 0 4px">legenda, corte, hook</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-ig">IG</span><span class="fw-out-badge fw-out-yt">Shorts</span></div>';
+  html += '</div>';
+
+  html += '<div class="fw-tk-path-divider">ou</div>';
+
+  html += '<div class="fw-tk-path">';
+  html += '<span class="fw-tk-path-label">regravar</span>';
+  html += '<div style="font-size:0.52rem;color:var(--text-muted);text-align:center;margin:2px 0 4px">tema provado, estudio</div>';
+  html += '<div class="fw-plat-row"><span class="fw-out-badge fw-out-ig">IG</span><span class="fw-out-badge fw-out-tk">TikTok</span><span class="fw-out-badge fw-out-yt">Shorts</span></div>';
+  html += '</div>';
+
+  html += '</div>';
+  html += '<div style="margin-top:8px;font-size:0.58rem;color:rgba(232,148,48,0.6);text-align:center;border-top:1px dashed rgba(255,255,255,0.05);padding-top:7px">★ regravar pode virar YouTube completo</div>';
+  html += '</div>';
+
+  html += '</div>'; // fw-track-tiktok
+
+  html += '</div></div></div>'; // fw-tracks + flywheel + card
+
+  // Week calendar
+  const months = ['','Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [calYear, calMonthNum] = STRATEGY.meta.month.split('-').map(Number);
+  const calMonthLabel = months[calMonthNum] + ' ' + calYear;
+  html += `<div class="section-title">Calendario de Producao — ${calMonthLabel}</div>`;
+  html += '<div class="prod-cal-grid">';
+
+  function prodItems(items, color) {
+    return items.map(it => `
+      <div class="prod-item-row">
+        <span class="prod-qty-badge" style="background:${color}22;color:${color};border-color:${color}44">${it.qty}</span>
+        <div>
+          <div style="font-size:0.65rem;font-weight:600;color:var(--text-primary);line-height:1.2">${it.label}</div>
+          <div style="font-size:0.57rem;color:var(--text-muted);margin-top:1px">${it.sub}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function publicaItem(item) {
+    const platMap = { 'IG': 'prod-plat-ig', 'TikTok': 'prod-plat-tk', 'Shorts': 'prod-plat-shorts' };
+    const platBadges = (item.platforms || []).map(p =>
+      `<span class="prod-plat-badge ${platMap[p] || ''}">${p}</span>`
+    ).join('');
+    return `
+      <div class="prod-item-row" style="align-items:flex-start">
+        <span class="prod-qty-badge" style="background:#34d39918;color:#34d399;border-color:#34d39930">${item.qty}</span>
+        <div style="flex:1">
+          <div style="font-size:0.63rem;font-weight:600;color:var(--text-primary);line-height:1.2">${item.label}</div>
+          ${item.source ? `<div style="font-size:0.54rem;color:var(--text-muted);margin-top:1px">← ${item.source}</div>` : ''}
+          <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">${platBadges}</div>
+        </div>
+      </div>`;
+  }
+
+  STRATEGY.productionWeeks.forEach(pw => {
+    html += `<div class="prod-cal-card">
+      <div class="prod-cal-header">
+        <span class="week-cal-num" style="font-size:1rem">Sem ${pw.num}</span>
+        ${pw.label ? `<span style="font-size:0.58rem;color:var(--accent);font-weight:600">${pw.label}</span>` : ''}
+      </div>
+      <div class="week-cal-dates" style="margin-bottom:8px">${pw.dates}</div>`;
+
+    // — PRODUZ —
+    const hasProduz = pw.gravar.length > 0 || pw.gabrielEntrega.length > 0 || pw.henriqueFaz.length > 0;
+    if (hasProduz) {
+      html += `<div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:6px">Produz</div>`;
+    }
+
+    if (pw.gravar.length > 0) {
+      html += `<div class="prod-block prod-block-record">
+        <div class="prod-block-title">🎬 Gravar</div>
+        ${prodItems(pw.gravar, '#E89430')}
+      </div>`;
+    }
+
+    if (pw.gabrielEntrega.length > 0) {
+      html += `<div class="prod-block prod-block-gabriel">
+        <div class="prod-block-title">✂️ Gabriel entrega</div>
+        ${prodItems(pw.gabrielEntrega, '#60a5fa')}
+      </div>`;
+    }
+
+    if (pw.henriqueFaz.length > 0) {
+      html += `<div class="prod-block prod-block-henrique">
+        <div class="prod-block-title">📋 Henrique faz</div>
+        ${prodItems(pw.henriqueFaz, '#a78bfa')}
+      </div>`;
+    }
+
+    // — PUBLICA —
+    html += `<div class="prod-publica-divider">
+      <div class="prod-publica-divider-line"></div>
+      <div class="prod-publica-divider-label">↓ Publica</div>
+      <div class="prod-publica-divider-line"></div>
+    </div>`;
+
+    if (pw.publica && pw.publica.length > 0) {
+      html += `<div class="prod-block prod-block-publish">
+        <div class="prod-block-title" style="color:#34d399">📤 Vai ao ar</div>
+        ${pw.publica.map(it => publicaItem(it)).join('')}
+      </div>`;
+    } else {
+      html += `<div style="text-align:center;font-size:0.62rem;color:var(--text-muted);padding:6px 0;font-style:italic">Sem publicacao esta semana</div>`;
+    }
+
+    html += `</div>`; // prod-cal-card
+  });
+
+  html += '</div>';
+
+  main.innerHTML = html;
+}
+
+function statCard(label, filled, total, color) {
+  const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+  return `<div class="stat-card">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value" style="color:${color}">${filled}<span style="font-size:1rem;color:var(--text-muted);font-weight:400">/${total}</span></div>
+    <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+// ============================================================
+// TAB 2: ROADMAP
+// ============================================================
+function buildRoadmapEvents() {
+  const gravaEvts = {};
+  const gabrielEvts = {};
+  const henriqueEvts = {};
+  const mlabsEvts = {};
+  const publicaRanges = [];
+
+  STRATEGY.productionWeeks.forEach(pw => {
+    // Extrair dia do campo sub usando regex
+    function extractDay(sub) {
+      const m = sub.match(/(\d{2})$/);
+      return m ? parseInt(m[1]) : null;
+    }
+
+    pw.gravar.forEach(g => {
+      const d = extractDay(g.sub);
+      if (d) {
+        const short = g.label.includes('YouTube') ? 'YT' :
+                      g.label.includes('Ancora') ? 'Ancora' :
+                      g.qty > 1 ? g.label.replace(/\s+/g,'').slice(0,8) : g.label.slice(0,8);
+        gravaEvts[d] = { short: short, label: g.qty + '× ' + g.label + ' · ' + g.sub, color: '#E89430' };
+      }
+    });
+
+    pw.gabrielEntrega.forEach(g => {
+      const d = extractDay(g.sub);
+      if (d) {
+        gabrielEvts[d] = { short: g.qty + '↓', label: 'Entrega: ' + g.qty + '× ' + g.label, color: '#60a5fa' };
+      }
+    });
+
+    pw.henriqueFaz.forEach(g => {
+      const d = extractDay(g.sub);
+      if (d) {
+        henriqueEvts[d] = { short: g.label.slice(0,7), label: g.label + ' · ' + g.sub, color: '#a78bfa' };
+      }
+    });
+
+    // mLabs: procurar em henriqueFaz por "mLabs"
+    pw.henriqueFaz.filter(h => h.label.toLowerCase().includes('mlabs')).forEach(g => {
+      const d = extractDay(g.sub);
+      if (d) {
+        mlabsEvts[d] = { short: 'mLabs S' + pw.num, label: g.label + ' · ' + g.sub, color: '#34d399' };
+        // Remover do henriqueEvts pra nao duplicar
+        delete henriqueEvts[d];
+      }
+    });
+
+    // Publica ranges
+    if (pw.publica.length > 0) {
+      const [startStr, endStr] = pw.dates.split('–').map(s => s.trim());
+      const start = parseInt(startStr.split('/')[0]);
+      const end = parseInt(endStr.split('/')[0]);
+      const total = pw.publica.reduce((s, p) => s + p.qty, 0);
+      const detail = pw.publica.map(p => p.qty + ' ' + p.label).join(' · ');
+      publicaRanges.push({ start, end, summary: total + ' posts', detail });
+    }
+  });
+
+  return { gravaEvts, gabrielEvts, henriqueEvts, mlabsEvts, publicaRanges };
+}
+
+function renderRoadmap(main) {
+  const [year, monthNum] = STRATEGY.meta.month.split('-').map(Number);
+  const daysInMonth = new Date(year, monthNum, 0).getDate();
+  const days = Array.from({length: daysInMonth}, (_, i) => i + 1);
+  const dayNames = ['D','S','T','Q','Q','S','S'];
+
+  const weekBounds = STRATEGY.productionWeeks.map(pw => {
+    const [startStr, endStr] = pw.dates.split('–').map(s => s.trim());
+    const start = parseInt(startStr.split('/')[0]);
+    const end = parseInt(endStr.split('/')[0]);
+    return { num: pw.num, start, end };
+  });
+  const weekStarts = new Set(weekBounds.map(wb => wb.start));
+
+  const { gravaEvts, gabrielEvts, henriqueEvts, mlabsEvts, publicaRanges } = buildRoadmapEvents();
+
+  const months = ['','Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const monthLabel = months[monthNum] + ' ' + year;
+
+  // ── Helper: render data row ──────────────────────────────────
+  function evtRow(label, evts) {
+    let r = `<div class="pt-row-label">${label}</div>`;
+    days.forEach(d => {
+      const ev = evts[d];
+      const wks = weekStarts.has(d) ? ' pt-wkstart' : '';
+      if (ev) {
+        r += `<div class="pt-cell${wks}" title="${ev.label}">
+          <div class="pt-event" style="background:${ev.color}18;border:1px solid ${ev.color}55">
+            <span style="font-size:0.46rem;font-weight:700;color:${ev.color};text-align:center;line-height:1.2">${ev.short}</span>
+          </div>
+        </div>`;
+      } else {
+        r += `<div class="pt-cell${wks}"></div>`;
+      }
+    });
+    return r;
+  }
+
+  // ── Build timeline ───────────────────────────────────────────
+  let html = `<div class="card"><div class="section-title">Pipeline Completo — ${monthLabel}</div>`;
+  html += `<div style="overflow-x:auto"><div class="pipeline-tl" style="grid-template-columns: 115px repeat(${daysInMonth}, 1fr)">`;
+
+  // Header: day numbers
+  html += `<div class="pt-row-label" style="font-size:0.6rem;color:var(--text-muted);padding:4px 8px">${monthLabel.split(' ')[0]}</div>`;
+  days.forEach(d => {
+    const dn = new Date(year, monthNum - 1, d).getDay();
+    const isWe = dn === 0 || dn === 6;
+    const isWs = weekStarts.has(d);
+    html += `<div class="pt-hcell${isWe ? ' pt-weekend' : ''}${isWs ? ' pt-wkstart' : ''}">${d}<br><span>${dayNames[dn]}</span></div>`;
+  });
+
+  // Week label row
+  html += '<div class="pt-row-label" style="padding:2px 8px"></div>';
+  weekBounds.forEach(wb => {
+    const monthStr = String(monthNum).padStart(2, '0');
+    html += `<div class="pt-week-label" style="grid-column:span ${wb.end - wb.start + 1}">S${wb.num} · ${String(wb.start).padStart(2,'0')}–${wb.end}/${monthStr}</div>`;
+  });
+
+  // Data rows
+  html += evtRow('🎬 Grava', gravaEvts);
+  html += evtRow('✂️ Gabriel', gabrielEvts);
+  html += evtRow('📋 Henrique', henriqueEvts);
+  html += evtRow('📅 mLabs', mlabsEvts);
+
+  // Publica row (ranges)
+  html += '<div class="pt-row-label">📤 Publica</div>';
+  // Empty cells before first publica range
+  if (publicaRanges.length > 0) {
+    const firstStart = publicaRanges[0].start;
+    if (firstStart > 1) {
+      html += `<div style="grid-column:span ${firstStart - 1};min-height:44px"></div>`;
+    }
+    publicaRanges.forEach((r, idx) => {
+      html += `<div class="pt-range" style="grid-column:span ${r.end - r.start + 1};background:#34d39918;border:1px solid #34d39950" title="${r.detail}">
+        <div>
+          <div style="font-size:0.56rem;font-weight:700;color:#34d399">${r.summary}</div>
+          <div style="font-size:0.44rem;color:var(--text-muted);line-height:1.3;margin-top:1px">${r.detail}</div>
+        </div>
+      </div>`;
+      // Gap between ranges
+      if (idx < publicaRanges.length - 1) {
+        const gap = publicaRanges[idx + 1].start - r.end - 1;
+        if (gap > 0) {
+          html += `<div style="grid-column:span ${gap};min-height:44px"></div>`;
+        }
+      }
+    });
+  }
+
+  html += '</div></div>';
+
+  // Legend
+  html += '<div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap">';
+  [{c:'#E89430',l:'Gravacao'},{c:'#60a5fa',l:'Gabriel entrega'},{c:'#a78bfa',l:'Henrique produz'},{c:'#34d399',l:'mLabs / Publica'}].forEach(x => {
+    html += `<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--text-secondary)"><div style="width:12px;height:12px;border-radius:3px;background:${x.c}30;border:1px solid ${x.c}70"></div>${x.l}</div>`;
+  });
+  html += '</div></div>';
+
+  // ── Weekly detail cards ───────────────────────────────────────
+  html += `<div class="section-title" style="margin-top:24px">Prazos por Semana</div>`;
+  html += '<div class="grid-4" style="margin-top:8px">';
+
+  STRATEGY.productionWeeks.forEach((pw, i) => {
+    const wc = ['#E89430','#60a5fa','#a78bfa','#34d399','#e879f9'][i % 5];
+    html += `<div class="card" style="padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:0.72rem;font-weight:700;color:${wc}">Sem ${pw.num}${pw.label ? ' — '+pw.label : ''}</span>
+        <span style="font-size:0.58rem;color:var(--text-muted)">${pw.dates}</span>
+      </div>`;
+
+    if (pw.gravar.length > 0) {
+      html += `<div style="font-size:0.58rem;font-weight:700;color:#E89430;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Grava</div>`;
+      pw.gravar.forEach(g => {
+        html += `<div style="font-size:0.62rem;color:var(--text-secondary);margin-bottom:3px;padding-left:8px">· ${g.qty > 1 ? g.qty+'× ' : ''}${g.label}<br><span style="font-size:0.55rem;color:var(--text-muted)">${g.sub}</span></div>`;
+      });
+    }
+    if (pw.gabrielEntrega.length > 0) {
+      html += `<div style="font-size:0.58rem;font-weight:700;color:#60a5fa;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.04em">Gabriel entrega</div>`;
+      pw.gabrielEntrega.forEach(g => {
+        html += `<div style="font-size:0.62rem;color:var(--text-secondary);margin-bottom:3px;padding-left:8px">· ${g.qty}× ${g.label}<br><span style="font-size:0.55rem;color:var(--text-muted)">${g.sub}</span></div>`;
+      });
+    }
+    if (pw.henriqueFaz.length > 0) {
+      html += `<div style="font-size:0.58rem;font-weight:700;color:#a78bfa;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.04em">Henrique faz</div>`;
+      pw.henriqueFaz.forEach(g => {
+        html += `<div style="font-size:0.62rem;color:var(--text-secondary);margin-bottom:3px;padding-left:8px">· ${g.label}<br><span style="font-size:0.55rem;color:var(--text-muted)">${g.sub}</span></div>`;
+      });
+    }
+    if (pw.publica.length > 0) {
+      const total = pw.publica.reduce((s, p) => s + p.qty, 0);
+      html += `<div style="font-size:0.58rem;font-weight:700;color:#34d399;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.04em">Publica · ${total} posts</div>`;
+      pw.publica.forEach(g => {
+        html += `<div style="font-size:0.62rem;color:var(--text-secondary);margin-bottom:2px;padding-left:8px">· ${g.qty}× ${g.label}</div>`;
+      });
+    } else {
+      html += `<div style="font-size:0.6rem;color:var(--text-muted);margin-top:8px;font-style:italic">Sem publicacao</div>`;
+    }
+
+    html += '</div>';
+  });
+
+  html += '</div>';
+
+  main.innerHTML = html;
+}
+
+// ============================================================
+// TAB 3: CARDAPIO SEMANAL
+// ============================================================
+// ============================================================
+// TAB 3/4: ANCORA + YOUTUBE (shared renderer)
+// ============================================================
+function renderAncora(main) { renderRecordingTab(main, 'ancora'); }
+function renderYoutube(main) { renderRecordingTab(main, 'youtube'); }
+
+function renderRecordingTab(main, type) {
+  const isAncora = type === 'ancora';
+  const label = isAncora ? 'Ancora' : 'YouTube';
+  const cssClass = isAncora ? 'rec-ancora' : 'rec-youtube';
+  const color = isAncora ? '#E89430' : '#f87171';
+
+  const filtered = CONTENT.weeks
+    .map((w, wi) => ({ w, wi }))
+    .filter(({ w }) => w.recording.type === type);
+
+  let html = '';
+
+  // Stats
+  const total = filtered.length;
+  const prepared = filtered.filter(({ w }) => w.recording.status !== 'planned').length;
+  const totalCuts = filtered.reduce((s, { w }) => s + w.recording.estimatedCuts, 0);
+  html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">`;
+  html += statCard(`Gravacoes ${label}`, prepared, total, color);
+  html += statCard('Cortes estimados', 0, totalCuts, '#60a5fa');
+  html += statCard('Editadas', filtered.filter(({ w }) => w.recording.status === 'edited' || w.recording.status === 'published').length, total, '#34d399');
+  html += '</div>';
+
+  // Recording cards
+  filtered.forEach(({ w, wi }) => {
+    const rec = w.recording;
+
+    html += `<div class="rec-card" style="margin-bottom:24px">`;
+
+    // Header
+    html += `<div class="rec-header">
+      <div class="flex-row gap-8">
+        <span class="rec-type-badge ${cssClass}">${label} — Semana ${w.weekNum}</span>
+        <span style="font-size:0.75rem;color:var(--text-muted);background:rgba(255,255,255,0.04);padding:3px 10px;border-radius:8px;font-weight:600">Cenario ${rec.scenario}</span>
+      </div>
+      ${statusBtnHTML(wi, null, rec.status)}
+    </div>`;
+
+    // Meta
+    html += `<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px">${w.dateRange}</div>`;
+    html += `<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px">~${rec.estimatedCuts} cortes estimados</div>`;
+
+    // Tema
+    html += `<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Tema</div>`;
+    html += `<textarea class="editable editable-title mb-8" placeholder="Tema da gravacao..." rows="2"
+      oninput="updateField(${wi}, null, 'theme', this.value)">${esc(rec.theme)}</textarea>`;
+
+    // Talking Points
+    html += `<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px">Talking Points</div>`;
+    rec.talkingPoints.forEach((tp, tpi) => {
+      html += `<div class="flex-row gap-8 mb-8">
+        <span style="color:var(--text-muted);font-size:0.75rem;min-width:18px">${tpi+1}.</span>
+        <textarea class="editable editable-sm" placeholder="Ponto ${tpi+1}..." rows="1"
+          oninput="updateTalkingPoint(${wi}, ${tpi}, this.value)">${esc(tp)}</textarea>
+      </div>`;
+    });
+    html += `<button class="add-btn" onclick="addTalkingPoint(${wi})">+ Adicionar ponto</button>`;
+
+    // Divider
+    html += `<div style="border-top:1px solid var(--border-card);margin:20px 0"></div>`;
+
+    // Cortes section
+    html += `<div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Cortes</div>`;
+    if (rec.status === 'edited' || rec.status === 'published') {
+      html += `<div style="padding:12px 16px;border-radius:8px;background:${color}08;border:1px solid ${color}30;font-size:0.8rem;color:${color}">
+        <span style="font-weight:600">~${rec.estimatedCuts} cortes entregues</span>
+        <span style="font-size:0.7rem;color:var(--text-muted);margin-left:8px">Editados por Gabriel</span>
+      </div>`;
+    } else {
+      html += `<div style="padding:16px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px dashed var(--border-card);text-align:center;color:var(--text-muted);font-size:0.8rem;font-style:italic">
+        Cortes aparecem apos gravacao + edicao
+      </div>`;
+    }
+
+    html += `</div>`; // rec-card
+  });
+
+  main.innerHTML = html;
+  attachStatusListeners();
+}
+
+function updateTalkingPoint(wi, tpi, value) {
+  CONTENT.weeks[wi].recording.talkingPoints[tpi] = value;
+  debouncedSave();
+}
+
+function addTalkingPoint(wi) {
+  CONTENT.weeks[wi].recording.talkingPoints.push('');
+  saveToStorage();
+  renderView();
+}
+
+// ============================================================
+// TAB 5: REELS PRODUZIDOS
+// ============================================================
+function renderReels(main) {
+  let html = '';
+
+  // Filter bar
+  html += '<div class="filter-bar">';
+  html += `<button class="filter-btn ${reelsFilter === 'all' ? 'active' : ''}" onclick="setReelsFilter('all')">Todos</button>`;
+  STRATEGY.pillars.forEach(p => {
+    html += `<button class="filter-btn ${reelsFilter === p.id ? 'active' : ''}" onclick="setReelsFilter('${p.id}')">${p.label}</button>`;
+  });
+  html += '</div>';
+
+  CONTENT.weeks.forEach((w, wi) => {
+    const reels = w.reels || [];
+    if (reels.length === 0 && !w.isPartial) return;
+    const filtered = reels.filter(r => reelsFilter === 'all' || r.pillar === reelsFilter);
+    if (filtered.length === 0 && reelsFilter !== 'all') return;
+
+    html += `<div class="section-title mt-16">Semana ${w.weekNum} — ${w.dateRange}</div>`;
+    html += '<div class="flex-col gap-8">';
+
+    reels.forEach((r, ri) => {
+      if (reelsFilter !== 'all' && r.pillar !== reelsFilter) return;
+      html += `<div class="tiktok-item" style="border-left:3px solid ${r.pillar ? getPillarColor(r.pillar) : 'var(--border-card)'}">
+        <div class="flex-row flex-wrap gap-8">
+          <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600">S${w.weekNum}.${ri+1}</span>
+          <select class="pillar-select" onchange="updateReelField(${wi}, ${ri}, 'pillar', this.value)">
+            <option value="">Pilar...</option>
+            ${STRATEGY.pillars.map(p => `<option value="${p.id}" ${r.pillar === p.id ? 'selected' : ''}>${p.label}</option>`).join('')}
+          </select>
+          ${r.pillar ? `<span class="pill pill-${r.pillar}">${getPillarLabel(r.pillar)}</span>` : ''}
+          ${statusBtnHTML_reel(wi, ri, r.status)}
+        </div>
+        <textarea class="editable" placeholder="Tema do Reel..." rows="1"
+          oninput="updateReelField(${wi}, ${ri}, 'theme', this.value)">${esc(r.theme)}</textarea>
+        <textarea class="editable editable-sm" placeholder="Gancho 3s..." rows="1"
+          oninput="updateReelField(${wi}, ${ri}, 'hook', this.value)">${esc(r.hook)}</textarea>
+        <textarea class="editable editable-sm" placeholder="CTA (comenta, salva, link bio)..." rows="1"
+          oninput="updateReelField(${wi}, ${ri}, 'cta', this.value)">${esc(r.cta)}</textarea>
+      </div>`;
+    });
+
+    if (reels.length === 0) {
+      html += `<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:0.75rem;font-style:italic">Sem reels nesta semana (parcial)</div>`;
+    }
+
+    html += `<button class="add-btn" onclick="addReel(${wi})">+ Adicionar reel</button>`;
+    html += '</div>';
+  });
+
+  main.innerHTML = html;
+  attachReelStatusListeners();
+}
+
+function setReelsFilter(f) {
+  reelsFilter = f;
+  renderView();
+}
+
+function updateReelField(wi, ri, field, value) {
+  CONTENT.weeks[wi].reels[ri][field] = value;
+  debouncedSave();
+  if (field === 'pillar') renderView();
+}
+
+function addReel(wi) {
+  if (!CONTENT.weeks[wi].reels) CONTENT.weeks[wi].reels = [];
+  CONTENT.weeks[wi].reels.push({ theme: '', pillar: '', hook: '', cta: '', status: 'planned' });
+  saveToStorage();
+  renderView();
+}
+
+function cycleReelStatus(wi, ri) {
+  const r = CONTENT.weeks[wi].reels[ri];
+  const idx = STATUS_LIST.indexOf(r.status);
+  r.status = STATUS_LIST[(idx + 1) % STATUS_LIST.length];
+  saveToStorage();
+  renderView();
+}
+
+// ============================================================
+// TAB 6: CARROSSEIS
+// ============================================================
+function renderCarrosseis(main) {
+  let html = '<div class="carousel-grid">';
+
+  CONTENT.weeks.forEach((w, wi) => {
+    w.slots.forEach((s, si) => {
+      if (s.format !== 'carrossel') return;
+      html += `<div class="card" style="border-left:3px solid ${getPillarColor(s.pillar)}">
+        <div class="flex-row mb-8 flex-wrap">
+          <span class="pill pill-${s.pillar}">${getPillarLabel(s.pillar)}</span>
+          <span style="font-size:0.7rem;color:var(--text-muted)">S${w.weekNum} | ${s.day}</span>
+          ${statusBtnHTML(wi, si, s.status)}
+        </div>
+        <textarea class="editable editable-title mb-8" placeholder="Titulo do carrossel..." rows="1"
+          oninput="updateField(${wi}, ${si}, 'title', this.value)">${esc(s.title)}</textarea>
+        <textarea class="editable editable-sm mb-8" placeholder="Hook (slide 1)..." rows="1"
+          oninput="updateField(${wi}, ${si}, 'hook', this.value)">${esc(s.hook)}</textarea>
+        <div class="flex-row gap-8 mb-8">
+          <select class="struct-select" onchange="updateField(${wi}, ${si}, 'structure', this.value)">
+            <option value="" ${!s.structure ? 'selected' : ''}>Estrutura...</option>
+            <option value="framework" ${s.structure === 'framework' ? 'selected' : ''}>Framework</option>
+            <option value="comparacao" ${s.structure === 'comparacao' ? 'selected' : ''}>Comparacao</option>
+            <option value="lista" ${s.structure === 'lista' ? 'selected' : ''}>Lista</option>
+            <option value="opiniao" ${s.structure === 'opiniao' ? 'selected' : ''}>Opiniao</option>
+          </select>
+          <input type="number" class="slide-input" min="0" max="20" value="${s.slideCount || ''}" placeholder="Slides"
+            oninput="updateField(${wi}, ${si}, 'slideCount', parseInt(this.value)||0)">
+        </div>
+        <textarea class="editable editable-sm" placeholder="Notas..." rows="2"
+          oninput="updateField(${wi}, ${si}, 'notes', this.value)">${esc(s.notes)}</textarea>
+      </div>`;
+    });
+  });
+
+  html += '</div>';
+  main.innerHTML = html;
+  attachStatusListeners();
+}
+
+// ============================================================
+// TAB 6: TIKTOK
+// ============================================================
+function renderTiktok(main) {
+  let html = '';
+
+  // Filter bar
+  html += '<div class="filter-bar">';
+  html += `<button class="filter-btn ${tiktokFilter === 'all' ? 'active' : ''}" onclick="setTiktokFilter('all')">Todos</button>`;
+  STRATEGY.pillars.forEach(p => {
+    html += `<button class="filter-btn ${tiktokFilter === p.id ? 'active' : ''}" onclick="setTiktokFilter('${p.id}')">${p.label}</button>`;
+  });
+  html += '</div>';
+
+  CONTENT.weeks.forEach((w, wi) => {
+    const filtered = w.tiktok.map((t, ti) => ({ ...t, ti })).filter(t => tiktokFilter === 'all' || t.pillar === tiktokFilter);
+    if (filtered.length === 0 && tiktokFilter !== 'all') return;
+
+    html += `<div class="section-title mt-16">Semana ${w.weekNum} — ${w.dateRange}</div>`;
+    html += '<div class="flex-col gap-8">';
+
+    w.tiktok.forEach((t, ti) => {
+      if (tiktokFilter !== 'all' && t.pillar !== tiktokFilter) return;
+      html += `<div class="tiktok-item">
+        <div class="flex-row flex-wrap gap-8">
+          <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600">S${w.weekNum}.${ti+1}</span>
+          <select class="pillar-select" onchange="updateTiktokField(${wi}, ${ti}, 'pillar', this.value)">
+            <option value="">Pilar...</option>
+            ${STRATEGY.pillars.map(p => `<option value="${p.id}" ${t.pillar === p.id ? 'selected' : ''}>${p.label}</option>`).join('')}
+          </select>
+          ${t.pillar ? `<span class="pill pill-${t.pillar}">${getPillarLabel(t.pillar)}</span>` : ''}
+          ${statusBtnHTML_tiktok(wi, ti, t.status)}
+        </div>
+        <textarea class="editable" placeholder="Tema do TikTok..." rows="1"
+          oninput="updateTiktokField(${wi}, ${ti}, 'theme', this.value)">${esc(t.theme)}</textarea>
+        <textarea class="editable editable-sm" placeholder="Contexto (por que agora)..." rows="1"
+          oninput="updateTiktokField(${wi}, ${ti}, 'context', this.value)">${esc(t.context)}</textarea>
+      </div>`;
+    });
+
+    html += `<button class="add-btn" onclick="addTiktok(${wi})">+ Adicionar ideia</button>`;
+    html += '</div>';
+  });
+
+  main.innerHTML = html;
+  attachTiktokStatusListeners();
+}
+
+function setTiktokFilter(f) {
+  tiktokFilter = f;
+  renderView();
+}
+
+function updateTiktokField(wi, ti, field, value) {
+  CONTENT.weeks[wi].tiktok[ti][field] = value;
+  debouncedSave();
+  if (field === 'pillar') renderView();
+}
+
+function addTiktok(wi) {
+  CONTENT.weeks[wi].tiktok.push({ theme: '', pillar: '', context: '', status: 'planned' });
+  saveToStorage();
+  renderView();
+}
+
+function cycleTiktokStatus(wi, ti) {
+  const t = CONTENT.weeks[wi].tiktok[ti];
+  const idx = STATUS_LIST.indexOf(t.status);
+  t.status = STATUS_LIST[(idx + 1) % STATUS_LIST.length];
+  saveToStorage();
+  renderView();
+}
+
+// ============================================================
+// TAB 7: BRIEFING GABRIEL
+// ============================================================
+function renderBriefing(main) {
+  let html = '';
+
+  CONTENT.weeks.forEach((w, wi) => {
+    const rec = w.recording;
+    const typeLabel = rec.type === 'ancora' ? 'Ancora' : 'YouTube';
+    const carrosseis = w.slots.filter(s => s.format === 'carrossel');
+
+    html += `<div class="briefing-section" id="briefing-${wi}">
+      <div class="briefing-header" onclick="toggleBriefing(${wi})">
+        <div class="flex-row gap-8">
+          <span style="font-weight:700;font-size:0.95rem">Semana ${w.weekNum}</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)">${w.dateRange}</span>
+          <span class="rec-type-badge ${rec.type === 'ancora' ? 'rec-ancora' : 'rec-youtube'}" style="font-size:0.65rem">${typeLabel}</span>
+        </div>
+        <span class="briefing-chevron">&#9660;</span>
+      </div>
+      <div class="briefing-body">
+        <div class="card mb-16">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Gravacao</div>
+          <div style="font-size:0.85rem">${rec.theme || '(tema nao definido)'}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">${typeLabel} | Cenario ${rec.scenario} | ~${rec.estimatedCuts} cortes</div>
+          ${rec.talkingPoints.filter(tp => tp).length > 0 ? `<div style="margin-top:8px;font-size:0.75rem;color:var(--text-muted)">Talking Points:</div><ul style="margin:4px 0 0 16px;font-size:0.8rem;color:var(--text-secondary)">${rec.talkingPoints.filter(tp => tp).map(tp => `<li>${esc(tp)}</li>`).join('')}</ul>` : ''}
+        </div>
+
+        <div class="card mb-16">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Cortes (~${rec.estimatedCuts} estimados)</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);font-style:italic">Cortes serao definidos apos gravacao e edicao pelo Gabriel</div>
+        </div>
+
+        <div class="card mb-16">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Reels produzidos (${(w.reels||[]).length})</div>
+          ${(w.reels||[]).map(r => `<div class="flex-row gap-8 mb-8">
+            ${r.pillar ? `<span class="pill pill-${r.pillar}" style="font-size:0.6rem">${getPillarLabel(r.pillar)}</span>` : ''}
+            <span style="font-size:0.8rem">${r.theme || '(sem tema)'}</span>
+            ${r.hook ? `<span style="font-size:0.65rem;color:var(--text-muted)">Hook: "${esc(r.hook)}"</span>` : ''}
+          </div>`).join('') || '<div style="font-size:0.75rem;color:var(--text-muted);font-style:italic">Sem reels nesta semana</div>'}
+        </div>
+
+        <div class="card mb-16">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Carrosseis (${carrosseis.length})</div>
+          ${carrosseis.map(s => `<div class="flex-row gap-8 mb-8">
+            <span class="pill pill-${s.pillar}" style="font-size:0.6rem">${getPillarLabel(s.pillar)}</span>
+            <span style="font-size:0.8rem">${s.title || '(sem titulo)'}</span>
+            ${s.structure ? `<span style="font-size:0.65rem;color:var(--text-muted)">[${s.structure}]</span>` : ''}
+            ${s.slideCount ? `<span style="font-size:0.65rem;color:var(--text-muted)">${s.slideCount} slides</span>` : ''}
+          </div>`).join('')}
+        </div>
+
+        <div class="flex-row gap-16 mb-16">
+          <div class="flex-col" style="flex:1">
+            <label style="font-size:0.75rem;color:var(--text-muted)">Deadline de entrega</label>
+            <input type="text" class="editable" placeholder="Ex: Quarta 09/04" value="${esc(w.briefing.deliveryDeadline)}"
+              oninput="updateBriefingField(${wi}, 'deliveryDeadline', this.value)">
+          </div>
+        </div>
+
+        <textarea class="editable mb-16" placeholder="Notas para o Gabriel..." rows="3"
+          oninput="updateBriefingField(${wi}, 'notes', this.value)">${esc(w.briefing.notes)}</textarea>
+
+        <button class="copy-btn" onclick="copyBriefing(${wi})">Copiar Briefing (markdown)</button>
+      </div>
+    </div>`;
+  });
+
+  main.innerHTML = html;
+}
+
+function toggleBriefing(wi) {
+  const el = document.getElementById(`briefing-${wi}`);
+  el.classList.toggle('briefing-collapsed');
+}
+
+function updateBriefingField(wi, field, value) {
+  CONTENT.weeks[wi].briefing[field] = value;
+  debouncedSave();
+}
+
+function copyBriefing(wi) {
+  const w = CONTENT.weeks[wi];
+  const rec = w.recording;
+  const typeLabel = rec.type === 'ancora' ? 'Ancora' : 'YouTube';
+  const carrosseis = w.slots.filter(s => s.format === 'carrossel');
+
+  let md = `# Briefing Semana ${w.weekNum} — ${w.dateRange}\n\n`;
+  md += `## Gravacao\n`;
+  md += `- Tipo: ${typeLabel} (Cenario ${rec.scenario})\n`;
+  md += `- Tema: ${rec.theme || '(nao definido)'}\n`;
+  md += `- Cortes estimados: ~${rec.estimatedCuts}\n`;
+  if (rec.talkingPoints.filter(t=>t).length > 0) {
+    md += `- Talking Points:\n`;
+    rec.talkingPoints.filter(t=>t).forEach((tp, i) => { md += `  ${i+1}. ${tp}\n`; });
+  }
+  md += `\n## Cortes\n`;
+  md += `- Estimados: ~${rec.estimatedCuts}\n`;
+  md += `- Cortes definidos apos gravacao e edicao pelo Gabriel\n`;
+  const reels = w.reels || [];
+  if (reels.length > 0) {
+    md += `\n## Reels produzidos (${reels.length})\n\n`;
+    reels.forEach((r, i) => {
+      md += `${i+1}. ${r.theme || '(sem tema)'}`;
+      if (r.pillar) md += ` [${getPillarLabel(r.pillar)}]`;
+      if (r.hook) md += ` — Hook: "${r.hook}"`;
+      if (r.cta) md += ` — CTA: ${r.cta}`;
+      md += `\n`;
+    });
+  }
+  md += `\n## Carrosseis (${carrosseis.length})\n\n`;
+  carrosseis.forEach((s, i) => {
+    md += `${i+1}. [${getPillarLabel(s.pillar)}] ${s.title || '(sem titulo)'}`;
+    if (s.structure) md += ` [${s.structure}]`;
+    if (s.slideCount) md += ` (${s.slideCount} slides)`;
+    md += `\n`;
+  });
+  if (w.briefing.deliveryDeadline) md += `\n## Deadline: ${w.briefing.deliveryDeadline}\n`;
+  if (w.briefing.notes) md += `\n## Notas\n${w.briefing.notes}\n`;
+
+  copyText(md);
+}
+
+// ============================================================
+// STATUS BUTTON HELPERS
+// ============================================================
+function statusBtnHTML(wi, si, status) {
+  return `<button class="status-btn status-${status}" data-wi="${wi}" data-si="${si === null ? 'null' : si}" data-type="slot">
+    <span class="sdot"></span>${STATUS_LABELS[status]}
+  </button>`;
+}
+
+function statusBtnHTML_tiktok(wi, ti, status) {
+  return `<button class="status-btn status-${status}" data-wi="${wi}" data-ti="${ti}" data-type="tiktok">
+    <span class="sdot"></span>${STATUS_LABELS[status]}
+  </button>`;
+}
+
+function statusBtnHTML_reel(wi, ri, status) {
+  return `<button class="status-btn status-${status}" data-wi="${wi}" data-ri="${ri}" data-type="reel">
+    <span class="sdot"></span>${STATUS_LABELS[status]}
+  </button>`;
+}
+
+function attachStatusListeners() {
+  document.querySelectorAll('.status-btn[data-type="slot"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wi = parseInt(btn.dataset.wi);
+      const si = btn.dataset.si === 'null' ? null : parseInt(btn.dataset.si);
+      cycleStatus(wi, si);
+    });
+  });
+}
+
+function attachTiktokStatusListeners() {
+  document.querySelectorAll('.status-btn[data-type="tiktok"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wi = parseInt(btn.dataset.wi);
+      const ti = parseInt(btn.dataset.ti);
+      cycleTiktokStatus(wi, ti);
+    });
+  });
+}
+
+function attachReelStatusListeners() {
+  document.querySelectorAll('.status-btn[data-type="reel"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wi = parseInt(btn.dataset.wi);
+      const ri = parseInt(btn.dataset.ri);
+      cycleReelStatus(wi, ri);
+    });
+  });
+}
+
+function cycleStatus(weekIdx, slotIdx) {
+  const item = slotIdx !== null ? CONTENT.weeks[weekIdx].slots[slotIdx] : CONTENT.weeks[weekIdx].recording;
+  const idx = STATUS_LIST.indexOf(item.status);
+  item.status = STATUS_LIST[(idx + 1) % STATUS_LIST.length];
+  saveToStorage();
+  renderView();
+}
+
+// ============================================================
+// FIELD UPDATE
+// ============================================================
+function updateField(weekIdx, slotIdx, field, value) {
+  if (slotIdx !== null) {
+    CONTENT.weeks[weekIdx].slots[slotIdx][field] = value;
+  } else {
+    CONTENT.weeks[weekIdx].recording[field] = value;
+  }
+  debouncedSave();
+  updateHeaderStats();
+}
+
+</script>
+</body>
+</html>
