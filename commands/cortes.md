@@ -152,18 +152,16 @@ Pergunte ao usuario:
 O que voce quer cortar?
 
 A) Gravacao LONGA (YouTube/Ancora/Solo — 30min a 2h)
-   → Me envie a transcricao Whisper (JSON com timestamps) ou SRT
-   → Tipo de gravacao: YouTube solo / Ancora conversa / Ancora solo / Outro?
-
 B) Corte CURTO ja feito (30-90s)
-   → Me envie a transcricao (com ou sem timestamps)
-   → Ou cole o texto direto aqui
 
-Pra gerar XML pro Premiere (opcional):
-- Caminho do arquivo de video: ___
+Como voce tem o conteudo?
+1) Tenho o VIDEO (mp4/mov/wav) — eu transcrevo automaticamente via Deepgram
+2) Tenho a TRANSCRICAO com timestamps (Whisper JSON / SRT)
+3) Tenho so o TEXTO (sem timestamps)
+
+Se tiver video e quiser XML pro Premiere:
+- Caminho do arquivo: ___
 - Framerate (padrao 29.97fps): ___
-
-Formato da transcricao: Whisper JSON / SRT / Texto puro?
 ```
 
 ESPERE resposta.
@@ -171,12 +169,125 @@ ESPERE resposta.
 **Deteccao de modo:**
 - Duracao total > 300s (5min): **MODO LONGO**
 - Duracao total <= 300s: **MODO CURTO**
-- Sem timestamps: perguntar ao usuario qual modo
+- Sem timestamps e sem video: perguntar ao usuario qual modo
 
 **Parsing de input:**
 - **Whisper JSON:** parsear `segments[]` com `start`, `end`, `text`. Se tiver `words[]`, usar timestamps word-level.
 - **SRT:** parsear blocos numerados com `HH:MM:SS,mmm --> HH:MM:SS,mmm`.
-- **Texto puro:** sem timestamps. Analise de conteudo funciona, mas XMEML nao e possivel — informar usuario.
+- **Deepgram JSON:** parsear `results.channels[0].alternatives[0].words[]` com `word`, `start`, `end`, `speaker`.
+- **Texto puro:** sem timestamps. Analise de conteudo funciona, mas XMEML nao e possivel — informar usuario e oferecer transcrever via Deepgram se tiver o video.
+
+## Passo 2.5 — Transcrever via Deepgram (se necessario)
+
+Se o usuario forneceu apenas o arquivo de video/audio (sem transcricao), transcrever automaticamente via Deepgram Nova-3.
+
+### Quando rodar
+- Usuario escolheu opcao "1) Tenho o VIDEO"
+- OU usuario colou texto puro E tem o video E quer XMEML (precisa de timestamps)
+
+### Etapa 1 — Extrair audio com FFmpeg
+
+SEMPRE extrair audio antes de enviar pra API. Video de 1h = 2-4GB. Audio = 30-50MB.
+
+```bash
+ffmpeg -i "[CAMINHO_VIDEO]" -vn -acodec libmp3lame -q:a 4 -y "[CAMINHO_AUDIO_TEMP]"
+```
+
+- `-vn` = sem video
+- `-acodec libmp3lame -q:a 4` = MP3 ~130kbps (qualidade suficiente pra transcricao)
+- Caminho temp: `{{materiais}}/temp-audio-YYYY-MM-DD.mp3`
+- Se o input JA for audio (mp3/wav/m4a): pular FFmpeg, usar direto
+
+### Etapa 2 — Enviar audio pro Deepgram Nova-3
+
+```bash
+python3 -c "
+import urllib.request, json, sys, os
+
+# Carregar API key do .env do plugin
+API_KEY = ''
+for p in [
+    os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), '.env'),
+    r'C:/Users/Henrique Carvalho/Documents/PROGRAMAS/plugin-social-media/.env',
+]:
+    if os.path.exists(p):
+        with open(p) as f:
+            for line in f:
+                if line.startswith('DEEPGRAM_API_KEY='):
+                    API_KEY = line.strip().split('=',1)[1]
+                    break
+        if API_KEY: break
+
+if not API_KEY:
+    API_KEY = os.environ.get('DEEPGRAM_API_KEY', '')
+if not API_KEY:
+    print(json.dumps({'error': 'DEEPGRAM_API_KEY nao encontrada. Verificar .env do plugin.'}))
+    sys.exit(1)
+
+audio_path = sys.argv[1]
+output_path = sys.argv[2]
+
+with open(audio_path, 'rb') as f:
+    audio_data = f.read()
+
+print(f'Enviando {len(audio_data)/1024/1024:.1f} MB pro Deepgram Nova-3...', file=sys.stderr)
+
+url = 'https://api.deepgram.com/v1/listen?model=nova-3&language=pt-BR&smart_format=true&diarize=true&utterances=true&punctuate=true'
+req = urllib.request.Request(url, data=audio_data, method='POST')
+req.add_header('Authorization', f'Token {API_KEY}')
+req.add_header('Content-Type', 'audio/mpeg')
+
+resp = urllib.request.urlopen(req, timeout=600)
+result = json.loads(resp.read().decode())
+
+with open(output_path, 'w', encoding='utf-8') as f:
+    json.dump(result, f, ensure_ascii=False, indent=2)
+
+words = result.get('results',{}).get('channels',[{}])[0].get('alternatives',[{}])[0].get('words',[])
+utterances = result.get('results',{}).get('utterances',[])
+duration = result.get('metadata',{}).get('duration', 0)
+speakers = set(w.get('speaker',0) for w in words)
+
+print(json.dumps({
+    'status': 'ok',
+    'output_path': output_path,
+    'duration_seconds': duration,
+    'word_count': len(words),
+    'speaker_count': len(speakers),
+    'utterance_count': len(utterances)
+}))
+" "[CAMINHO_AUDIO]" "[CAMINHO_OUTPUT_JSON]"
+```
+
+### Etapa 3 — Limpar temp
+
+Apagar o MP3 temporario apos transcricao:
+```bash
+rm "[CAMINHO_AUDIO_TEMP]"
+```
+
+**Caminho do output JSON:** salvar em `{{materiais}}/transcricao-YYYY-MM-DD-[nome_video].json`
+
+**Se falhar:** informar o erro e sugerir alternativas (colar transcricao manualmente, rodar Whisper local).
+
+### Apos transcrever
+
+1. Ler o JSON gerado
+2. Usar `results.channels[0].alternatives[0].words[]` como fonte de timestamps word-level
+3. Usar `results.utterances[]` para segmentacao por speaker (diarizacao)
+4. Informar ao usuario:
+
+```
+Transcricao gerada via Deepgram Nova-3:
+- Duracao: [MM:SS]
+- Palavras: [N]
+- Speakers identificados: [N]
+- Salvo em: [caminho]
+
+Prosseguindo com a analise...
+```
+
+Continuar pro Passo 3 automaticamente.
 
 ## Passo 3 — Processar transcricao
 
