@@ -75,6 +75,17 @@ Leia estes arquivos simultaneamente:
 - Use `clickup_filter_tasks` na list {{clickup_list_id}} com status "{{clickup_status_ideia}}" (as 20 mais recentes)
 - Use `clickup_filter_tasks` com status "{{clickup_status_publicado}}" + include_closed (ultimos 14 dias) — pra NAO repetir
 
+**YouTube (validacao de demanda):**
+- Busque `{{conhecimento}}/*youtube*` ou `{{conhecimento}}/*yt*` via Glob
+- Se existir: usar dados de demanda pra priorizar temas de YouTube longo
+- Se NAO existir: flag interna `SEM_PESQUISA_YT = true` — temas YouTube serao marcados
+
+**Material ja gravado (deduplicacao):**
+- Busque `{{sessoes}}/*workshop*` e `{{sessoes}}/*download*` — historias e conteudo ja gravado
+- Leia os titulos e temas principais de cada sessao encontrada
+- Monte lista interna `TEMAS_JA_GRAVADOS[]` com: titulo do tema + sessao de origem
+- Essa lista sera usada no Passo 3C pra evitar sugerir gravacao de algo que ja existe
+
 ## Passo 2 — Extrair os 3 insumos do cruzamento
 
 ### REGRA DE FONTES (CRITICA)
@@ -190,6 +201,18 @@ buscar sessoes mais antigas (ate 60 dias) que tenham historias de vida catalogad
 
 Cruzar com tendencias: "essa historia da um angulo forte pra essa tendencia?"
 
+### REGRA DE DEDUPLICACAO (CRITICA)
+
+Antes de promover uma historia/pepita a sugestao de GRAVACAO NOVA:
+1. Checar contra `TEMAS_JA_GRAVADOS[]` montado no Passo 1
+2. Checar `{{analises}}/*cardapio*.md` por temas similares
+3. Se o tema JA FOI GRAVADO em alguma sessao:
+   - NAO sugerir como gravacao nova (desperdiça tempo)
+   - Sugerir como `[CORTE EXISTENTE]`: "Fonte: [sessao]. Sugestao: extrair corte sobre [angulo especifico] do material ja gravado."
+4. Se apareceu em cardapio anterior mas NAO foi gravado: pode reusar com angulo diferente
+
+Exemplo: "9 anos de DJ" ja esta gravado em sessao de workshop. NAO sugerir ancora de 1h sobre isso. Sugerir corte especifico do material existente.
+
 ### 3D) Conhecimento relevante
 
 Busque em `{{conhecimento}}/` por arquivos com tags que cruzem com pilares.
@@ -217,25 +240,48 @@ ANGULO: "TDAH e vantagem (CEO Palantir) + meu HD de 1GB"
 
 ## Passo 4 — Apresentar angulos gerados
 
-Apresente os angulos em formato compacto, MOSTRANDO O CRUZAMENTO:
+Apresente os angulos com CONTEXTO SUFICIENTE pro criador avaliar sem adivinhar.
+
+Cada sugestao DEVE ter 4 campos obrigatorios alem do titulo:
+- **Contexto:** 2-3 linhas explicando de onde veio a ideia, qual a tese central, por que e relevante agora
+- **Fonte:** arquivo/radar/sessao especifico (caminho do arquivo)
+- **Diferencial:** o que torna unico vs o que concorrentes ja fizeram sobre o tema
+- **Cruzamento:** qual tendencia x qual lente x qual hook
 
 ```
 ## Angulos gerados — [Periodo]
 
 ### Cruzamentos Radar x Lente (novos)
 1. "[Frase-angulo]" — **[Pilar]**
-   Radar: [tendencia] | Lente: #[N] [nome] | Hook: [padrao]
+   Contexto: [2-3 linhas: tese central + por que agora]
+   Fonte: [arquivo especifico do radar/analise]
+   Diferencial: [o que torna unico vs concorrentes]
+   Cruzamento: Radar [X] x Lente #[N] [nome] | Hook: [padrao]
    
 2. "[Frase-angulo]" — **[Pilar]**
-   Radar: [tendencia] | Lente: #[N] [nome] | Hook: [padrao]
+   Contexto: [2-3 linhas]
+   Fonte: [arquivo]
+   Diferencial: [unico vs concorrentes]
+   Cruzamento: Radar [X] x Lente #[N] | Hook: [padrao]
 
 ### ClickUp com timing (ideias brutas + radar)
 1. "[Frase-angulo]" — **[Pilar]**
-   Ideia original: [titulo ClickUp] | Timing: [tendencia que ativou]
+   Contexto: [2-3 linhas: ideia original + como o radar deu timing]
+   Fonte: ClickUp [titulo] + [arquivo radar]
+   Diferencial: [o que muda com o timing]
+   Timing: [tendencia que ativou]
 
 ### Pepitas do cerebro (historias/vivencias)
 1. "[Frase-angulo]" — **[Pilar]**
-   Fonte: [sessao/conhecimento] | Hook: [padrao]
+   Contexto: [2-3 linhas: qual historia, resultado concreto, emocao]
+   Fonte: [sessao especifica — caminho do arquivo]
+   Diferencial: [vivencia propria, nao teoria]
+   Hook: [padrao]
+
+### Cortes de material existente [CORTE EXISTENTE]
+1. "[Frase-angulo]" — **[Pilar]**
+   Fonte: [sessao ja gravada]
+   Sugestao: [que trecho/angulo extrair do material]
 
 ### Ideias maduras sem timing (banco — usar quando encaixar)
 1. "[titulo]" — **[Pilar]** — Tags: [tags]
@@ -255,88 +301,210 @@ Para CADA semana:
 
 Calendario V2: YouTube e Ancora alternados quinzenalmente.
 
-- **Tipo:** YouTube (cenario A — solo) OU Ancora (cenario B — conversa/construcao)
-- **Tema:** o angulo mais forte da semana (priorizar cruzamentos novos)
+#### YouTube (cenario A — solo, ~8min)
+
+- **Tema:** angulo mais forte da semana, preparado com profundidade
 - **Pilar principal** + fonte do cruzamento
 - **Pontos pra gravar:** 5-7 pontos concretos
-- **Output estimado:** [N] cortes editaveis
+- **Output estimado:** 8 cortes editaveis
+- Se `SEM_PESQUISA_YT = true`: marcar `[SEM PESQUISA YT — validar demanda antes de gravar]`
 
 Se depende de timing e modo=mes:
 ```
 GRAVACAO: RADAR — tema do momento
-Tipo: [YouTube/Ancora]
+Tipo: YouTube
 Pilar sugerido: [X] (definir quando rodar /social-radar da semana)
+[SEM PESQUISA YT — validar demanda antes de gravar]
 ```
 
-### B) Carrosseis (3 por semana)
+#### Ancora — 2 subtipos
 
-{{criador}} produz com Claude Code (`/social:carrossel`).
+**Tipo 1: Conversa {{criador}} + Marco** (padrao)
+
+NAO e um tema unico. E uma PAUTA com 5-7 PONTOS DE DISCUSSAO variados.
+Cada ponto cobre pilar potencialmente diferente e gera 2-3 cortes independentes.
+O valor esta na variedade — uma ancora rende cortes pra todos os pilares na mesma sessao.
+
+Para cada ponto da pauta:
+- **Angulo** (1 frase)
+- **Contexto** (2 linhas: de onde veio, tese, por que agora)
+- **Pilar**
+- **Cortes esperados:** 2-3
+
+Output estimado total: ~14 cortes
+
+**Tipo 2: Solo livre**
+
+{{criador}} sozinho construindo ou falando. Formato tipo live, tema unico mais profundo.
+Tambem serve pra demos `[DEMO]` de coisas construidas ao vivo.
+
+- **Tema:** angulo forte do cruzamento
+- **Pilar** + fonte
+- **Pontos pra gravar:** 5-7 pontos concretos
+- **Output estimado:** ~14 cortes
+
+**Visita/convidado:** NAO entra no sugerir. Quando acontecer, entra como extra organico no banco de cortes.
+
+→ **VALIDACAO DE PILARES (1/4):** Checar distribuicao de pilares nas gravacoes do mes.
+Se algum pilar esta ausente nas gravacoes, considerar incluir ponto na pauta da ancora.
+
+### B) Reels produzidos (3 por semana) — cenario A, {{editor}} edita
+
+**REGRA: Reels custam producao (cenario A, edicao do {{editor}}).**
+Investir producao APENAS no que JA SABE que funciona:
+- Angulos com ER alto CONFIRMADO em analises de concorrentes
+- Temas que BOMBARAM no TikTok como teste (regra: TikTok testa → Reel produz)
+- Os cruzamentos MAIS FORTES do cardapio (top 3 de qualidade)
+
+Para cada Reel:
+- **Angulo** (do cruzamento — o MELHOR, nao o resto)
+- **Pilar** + fonte
+- **Formato:** Screencast [DEMO] | Talking head | Storytelling | Demo ao vivo
+- **Contexto:** 2-3 linhas de por que esse angulo merece investimento de producao
+- **Justificativa de producao:** por que investir edicao nesse (ER comprovado? Tema testado? Top-3?)
+- Tag `[DEMO]` quando for demonstracao de algo construido
+
+→ **VALIDACAO DE PILARES (2/4):** Checar % cumulativo (gravacoes + Reels). Desvio > 5% da meta? Rebalancear.
+
+### C) Carrosseis (3 por semana)
+
+{{criador}} produz com Claude Code (`/social-carrossel`).
 Para cada carrossel:
 - **Angulo** (do cruzamento — nao tema generico)
 - **Pilar** + fonte
+- **Contexto:** 2 linhas de tese central
 - **Tipo de hook** que vai usar
 
-### C) TikTok nativo (5-7 por semana)
+→ **VALIDACAO DE PILARES (3/4):** Checar % cumulativo (gravacoes + Reels + carrosseis). Desvio > 5%? Rebalancear.
 
-Celular na mao, sem edicao. Grava e posta cru.
+### D) TikTok nativo (5-7 por semana) — LABORATORIO
+
+TikTok e lab de R$0. Aqui entram os EXPERIMENTAIS, nao os melhores angulos.
+Grava e posta cru. Sem edicao. Se bombar → vira Reel produzido na semana seguinte.
+
 Para cada TikTok:
-- **Angulo** (pode ser versao crua de um cruzamento)
+- **Angulo** (pode ser versao crua de um cruzamento, provocacao rapida, teste de tema)
 - **Pilar** + contexto (por que agora)
+- Tag `[TESTE → REEL]` quando a intencao e testar antes de produzir Reel
+- Tag `[DEMO]` quando for demo apontando celular pra tela
+
+→ **VALIDACAO DE PILARES (4/4 — FINAL):** Checar % de TODAS as materias-primas do mes.
+Se algum pilar esta >5% fora da meta (35/25/25/15): rebalancear ANTES de apresentar ao {{criador}}.
+Prioridade de protecao: Pessoal (nunca abaixo de 10%) > TDAH > Visao > Arquiteto.
 
 ### O que NAO definir aqui
 
-- **Cortes IG (11/semana):** emergem da gravacao → `/social:cortes`
+- **Cortes IG (11/semana):** emergem da gravacao → `/social-cortes`
 - **YouTube Shorts:** repost dos melhores cortes
-- **Hooks escritos e copy:** responsabilidade da `/social:copy`
-- **Briefing pro {{editor}}:** responsabilidade da `/social:copy`
+- **Hooks escritos e copy:** responsabilidade da `/social-copy`
+- **Briefing pro {{editor}}:** responsabilidade da `/social-copy`
 
 ## Passo 6 — Apresentar e validar
 
-Apresente o cardapio completo:
+Apresente o cardapio completo. Usar o template adequado conforme o tipo de gravacao:
 
 ```
 ## SEMANA N — DD/MM a DD/MM
 
-### Gravacao
-Tipo: [YouTube / Ancora]
-Cenario: [A — estudio solo / B — mesa/conversa]
+### Gravacao — YouTube
+Cenario: A — estudio solo
 Angulo: "[Frase-angulo]"
 Pilar: [X] | Cruzamento: [radar] x [lente #N]
+[SEM PESQUISA YT — validar demanda antes de gravar] ← se aplicavel
+Contexto: [2-3 linhas: tese, por que agora, diferencial]
 Pontos pra gravar:
   1. [Ponto 1 — 1 frase]
   2. [Ponto 2 — 1 frase]
   3. [Ponto 3 — 1 frase]
   4. [Ponto 4 — 1 frase]
   5. [Ponto 5 — 1 frase]
-Output estimado: [N] cortes editaveis
+  6. [Ponto 6 — 1 frase]
+  7. [Ponto 7 — 1 frase]
+Output estimado: 8 cortes editaveis
+
+### Gravacao — Ancora (Conversa com Marco)
+Cenario: B — mesa/conversa
+Pauta de pontos:
+  1. "[Ponto]" — Pilar: [X]
+     Contexto: [2 linhas: de onde veio, tese, relevancia]
+     Fonte: [arquivo especifico]
+     Cortes esperados: [N]
+  2. "[Ponto]" — Pilar: [X]
+     Contexto: [2 linhas]
+     Fonte: [arquivo]
+     Cortes esperados: [N]
+  3. "[Ponto]" — Pilar: [X]
+     Contexto: [2 linhas]
+     Fonte: [arquivo]
+     Cortes esperados: [N]
+  4. "[Ponto]" — Pilar: [X]
+     Contexto: [2 linhas]
+     Fonte: [arquivo]
+     Cortes esperados: [N]
+  5. "[Ponto]" — Pilar: [X]
+     Contexto: [2 linhas]
+     Fonte: [arquivo]
+     Cortes esperados: [N]
+Output estimado total: ~14 cortes
+Distribuicao de pilares na pauta: Arq [N] / Visao [N] / TDAH [N] / Pessoal [N]
+
+### Reels produzidos (3) — cenario A, {{editor}} edita
+
+1. "[angulo]" — **[Pilar]** — [formato: Screencast/Demo/Talking head/Storytelling]
+   Contexto: [2 linhas: tese + por que agora]
+   Justificativa de producao: [por que investir edicao — ER comprovado? Tema testado? Top-3?]
+   Cruzamento: [origem]
+2. "[angulo]" — **[Pilar]** — [formato] [DEMO] ← se aplicavel
+   Contexto: [2 linhas]
+   Justificativa de producao: [motivo]
+   Cruzamento: [origem]
+3. "[angulo]" — **[Pilar]** — [formato]
+   Contexto: [2 linhas]
+   Justificativa de producao: [motivo]
+   Cruzamento: [origem]
 
 ### Carrosseis (3)
 
-1. "[angulo]" — **[Pilar]** — Cruzamento: [origem]
-2. "[angulo]" — **[Pilar]** — Cruzamento: [origem]
-3. "[angulo]" — **[Pilar]** — Cruzamento: [origem]
+1. "[angulo]" — **[Pilar]** — Hook: [tipo]
+   Contexto: [2 linhas: tese central]
+   Cruzamento: [origem]
+2. "[angulo]" — **[Pilar]** — Hook: [tipo]
+   Contexto: [2 linhas]
+   Cruzamento: [origem]
+3. "[angulo]" — **[Pilar]** — Hook: [tipo]
+   Contexto: [2 linhas]
+   Cruzamento: [origem]
 
-### TikTok nativo (5-7)
+### TikTok nativo (5-7) — LABORATORIO
 
-1. "[angulo]" — **[Pilar]** | Por que agora: [contexto]
+1. "[angulo]" — **[Pilar]** | Por que agora: [contexto] [TESTE → REEL] ← se aplicavel
 2. "[angulo]" — **[Pilar]** | Por que agora: [contexto]
 3. "[angulo]" — **[Pilar]** | Por que agora: [RADAR — tema do momento]
-4. "[angulo]" — **[Pilar]** | Por que agora: [contexto]
+4. "[angulo]" — **[Pilar]** | Por que agora: [contexto] [DEMO] ← se aplicavel
 5. "[angulo]" — **[Pilar]** | Por que agora: [contexto]
+
+### Distribuicao de pilares (esta semana)
+Arq: [N] ([%]) | Visao: [N] ([%]) | TDAH: [N] ([%]) | Pessoal: [N] ([%])
+Meta: 35/25/25/15 | Desvio: [OK / rebalancear X]
 
 ### Check
 - [ ] Gravacao com angulo de cruzamento (nao tema generico)?
+- [ ] Ancora com pauta multi-ponto (nao tema unico)?
+- [ ] Reels usam APENAS angulos validados/fortes (justificativa de producao)?
+- [ ] TikTok recebe experimentais (nao os melhores angulos)?
 - [ ] 3 carrosseis com angulos distintos?
 - [ ] 5-7 TikTok nativos?
-- [ ] Pilares balanceados ~35/25/25/15 (+-5%)? (minimo 15% Pessoal — nao sacrificar)
+- [ ] Pilares validados progressivamente e dentro de +-5%? Pessoal >= 10%?
+- [ ] Nenhum tema duplica material ja gravado?
+- [ ] Temas YouTube marcados se sem pesquisa de demanda?
+- [ ] Cada item tem contexto + fonte + diferencial?
 - [ ] Nenhum tema repetido de cardapios anteriores?
-- [ ] Cada item tem o cruzamento visivel (de onde veio)?
 - [ ] Pelo menos 50% dos angulos sao NOVOS (nao existiam no backlog)?
 
 ### NAO inclui (vem depois)
-- Cortes IG (11/sem) → /social:cortes apos transcricao
-- Hooks escritos e copy → /social:copy
-- Briefing pro {{editor}} → /social:copy
+- Cortes IG (11/sem) → /social-cortes apos transcricao
+- Hooks escritos e copy → /social-copy
+- Briefing pro {{editor}} → /social-copy
 ```
 
 ESPERE aprovacao ou ajustes do {{criador}}.
@@ -353,10 +521,14 @@ Busque `{{materiais}}/conteudo-*-content.json` do mes correspondente.
 **Se existir:**
 1. Leia o arquivo JSON
 2. Atualize o objeto com os dados do cardapio aprovado (apenas MATERIAS-PRIMAS, sem copy):
-   - `weeks[].recording` — theme, pillar, source, talkingPoints, status **"suggested"**
-   - `weeks[].carousels[]` — theme, pillar, source, status **"suggested"** (hook fica VAZIO)
-   - `weeks[].tiktok[]` — theme, pillar, context, status **"suggested"**
-   - `weeks[].slots[]` — NAO preencher (cortes vem do `/social:cortes`)
+   - `weeks[].recording`:
+     - Se YouTube: `type: "youtube"`, `theme`, `pillar`, `source`, `talkingPoints` (array de strings), `estimatedCuts: 8`, `status: "suggested"`
+     - Se Ancora conversa: `type: "ancora"`, `subtype: "conversa_marco"`, `talkingPoints` (array de objetos `{point, pillar, context, expectedCuts}`), `estimatedCuts: 14`, `status: "suggested"`
+     - Se Ancora solo: `type: "ancora"`, `subtype: "solo_livre"`, `theme`, `pillar`, `talkingPoints` (array de strings), `status: "suggested"`
+   - `weeks[].reels[]` — theme, pillar, format, context, productionJustification, tag (DEMO se aplicavel), status **"suggested"** (hook fica VAZIO — `/social-copy` preenche)
+   - `weeks[].carousels[]` — theme, pillar, source, context, status **"suggested"** (hook fica VAZIO)
+   - `weeks[].tiktok[]` — theme, pillar, context, tag (TESTE_REEL/DEMO se aplicavel), status **"suggested"**
+   - `weeks[].slots[]` — NAO preencher (cortes vem do `/social-cortes`)
    - `updatedAt` — data atual (YYYY-MM-DD)
 3. Salve o JSON via Write (substituicao completa do arquivo)
 
