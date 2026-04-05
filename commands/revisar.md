@@ -87,7 +87,101 @@ A partir dos arquivos lidos, construa mentalmente o CHECKLIST DE QUALIDADE:
 | Quantidade slides | 5-10 ideal (dados: 7-10 slides = maior engagement medio) | analises de referencia |
 | Musica | Carrossel SEMPRE com musica (IG e TikTok) | estrategia-conteudo.md |
 
+## Passo 1.5 — Puxar videos em revisao (atalho do pipeline Studio)
+
+Antes de perguntar o que revisar, oferece o atalho pra fila do Studio:
+
+```
+Quer revisar um video da fila do Studio @iairique ou outra coisa?
+
+1. Video em revisao (fila Studio @iairique)
+2. Outro (video avulso, carrossel, caption)
+```
+
+ESPERE resposta. Se escolher **2**, pule pro Passo 2 normal. Se escolher **1**, execute 1.5.1 a 1.5.4.
+
+### 1.5.1 — Listar videos em revisao
+
+Use `clickup_filter_tasks` com:
+- `list_id`: `901326469110` (Studio → @iairique → Conteudo)
+- `statuses`: `["revisao"]`
+- `assignees`: `[48769703]` (Henrique)
+
+Para cada task retornada, mostre em lista numerada:
+- Numero
+- Tag de formato entre colchetes (`corte`, `reels`, `carrossel`, `tiktok-nativo`, `video-longo`)
+- Titulo da task (entre aspas)
+- Data de entrega (`due_date` formatada dd/mm)
+
+Exemplo:
+```
+Videos em revisao (Studio → @iairique):
+1. [corte] "Guardrails de contexto" — entregue 03/04
+2. [reels] "TDAH e notebooks" — entregue 04/04
+3. [corte] "Por que dev vira arquiteto" — entregue 05/04
+
+Qual revisar? (numero)
+```
+
+Se **0 resultados**: informe "Nenhum video seu em revisao agora." e volte pro Passo 2 normal.
+
+ESPERE resposta com o numero.
+
+### 1.5.2 — Extrair link do Drive do ultimo comentario
+
+Apos escolha, use `clickup_get_task_comments` com o `task_id` escolhido.
+
+- Pegue o **ultimo comentario** (mais recente)
+- Procure a primeira URL `drive.google.com` via regex: `https?://drive\.google\.com/[^\s)]+`
+- Se nao achar no ultimo, tente os **3 comentarios mais recentes**
+- Se nao achar em nenhum:
+  ```
+  Nao achei link do Drive nos ultimos comentarios da task.
+  Cola o link aqui ou me manda o MP4 direto.
+  ```
+  ESPERE.
+
+**Obs:** hoje o combinado com o Gabriel e colocar o link do Drive no comentario ao mover pra `Revisao`. Se no futuro virar custom field "Link Revisao", ler o campo direto antes de cair nos comentarios.
+
+### 1.5.3 — Baixar o video do Drive
+
+1. Extraia o `FILE_ID` da URL:
+   - Padrao `/file/d/FILE_ID/view` → pegue FILE_ID
+   - Padrao `?id=FILE_ID` → pegue FILE_ID
+   - Padrao `/open?id=FILE_ID` → pegue FILE_ID
+
+2. Baixe via `gdown` pra pasta temp:
+   ```bash
+   python -m gdown "FILE_ID" -O "$TEMP/review-<task_id>.mp4"
+   ```
+   (No Windows com Git Bash, `$TEMP` resolve pra pasta temporaria do usuario.)
+
+3. Se o download falhar (video privado, erro 403, "Cannot retrieve the public link"):
+   ```
+   Video nao esta com link publico. Duas opcoes:
+   - Pede pro Gabriel liberar como "qualquer pessoa com o link pode visualizar"
+   - Me manda o MP4 direto aqui
+   ```
+   ESPERE.
+
+### 1.5.4 — Pre-popular contexto da task
+
+Leia os campos da task escolhida pra pular perguntas do Passo 2.1:
+- **Tipo:** video (ja sabe pelo contexto da fila)
+- **Pilar:** ler tags da task (`arquiteto`, `visao`, `tdah+sistema`, `pessoal`)
+- **Origem:** inferir da tag de formato (`corte` = corte de gravacao longa, `reels` = video curto roteirizado, `tiktok-nativo` = celular cru, etc.)
+- **Titulo:** `task.name`
+
+Confirme em uma linha unica:
+```
+Revisando "[titulo]" — pilar [X], formato [Y]. Algo especifico pra focar? (enter = tudo)
+```
+
+ESPERE resposta curta. Apos ela, **pule direto pro Passo 3.2** (ja tem o arquivo baixado em `$TEMP/review-<task_id>.mp4` e o contexto carregado). NAO execute o Passo 2 nem o 3.1.
+
 ## Passo 2 — Receber conteudo
+
+**So executa este passo se o usuario escolheu "2" no Passo 1.5 ou se nao ha videos em revisao.**
 
 Pergunte ao usuario:
 
@@ -125,9 +219,10 @@ Se o usuario nao quiser responder, assume: pilar=indefinido, origem=indefinida, 
 
 ### 3.1 — Baixar e enviar pro Gemini
 
-1. Se recebeu caminho local: use direto
-2. Se recebeu URL: baixe via Python `urllib` com User-Agent Mozilla para pasta temporaria
-3. Delegue ao agent `analista-video` com prompt detalhado (abaixo)
+1. Se veio do Passo 1.5: o arquivo ja esta em `$TEMP/review-<task_id>.mp4`, pule pro item 3
+2. Se recebeu caminho local: use direto
+3. Se recebeu URL: baixe via Python `urllib` com User-Agent Mozilla para pasta temporaria
+4. Delegue ao agent `analista-video` com prompt detalhado (abaixo)
 
 **Prompt pro analista-video:**
 
