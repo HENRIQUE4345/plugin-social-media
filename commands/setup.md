@@ -96,6 +96,13 @@ C) Nao uso ClickUp
 
 Se encontrar a list, tente detectar os statuses validos (via `clickup_get_list`) para preencher os campos de status.
 
+Apos encontrar a list, use `clickup_get_custom_fields` com o list_id pra descobrir custom fields. Procure por:
+- Campo tipo `drop_down` com nome parecido com "pilar" ou "conteudo" → salvar ID do campo + IDs de cada opcao
+- Campo tipo `drop_down` com nome parecido com "formato" → salvar ID do campo + IDs de cada opcao
+- Outros dropdowns relevantes
+
+Salvar os IDs no config (secao ClickUp) pra que outras skills usem via custom_fields em vez de tags.
+
 ### 3.4 — Cerebro (pastas de mineracao)
 
 Verifique se existem:
@@ -179,6 +186,13 @@ Salve em `{pasta_projeto}/config-social.md`:
 | List ID (conteudo) | {clickup_list_id} |
 | Status: ideia | {clickup_status_ideia} |
 | Status: publicado | {clickup_status_publicado} |
+| Custom field: Pilar de Conteudo | {pilar_field_id} |
+| Pilar: {opcao1} | {opcao1_id} |
+| Pilar: {opcao2} | {opcao2_id} |
+| ... | ... |
+| Custom field: Formato | {formato_field_id} (se existir) |
+| Formato: {opcao1} | {opcao1_id} |
+| ... | ... |
 
 ## Cerebro
 

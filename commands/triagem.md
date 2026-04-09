@@ -39,8 +39,7 @@ Execute em paralelo:
 **ClickUp — ideias atuais:**
 - Use `clickup_filter_tasks` na list {{clickup_list_id}} (Conteudo {{perfil}}) com status "{{clickup_status_ideia}}"
 - Se count > len(tasks), buscar paginas seguintes (page 0, 1, 2...) ate ter todas
-- Para cada ideia com prioridade urgent ou high: use `clickup_get_task` pra ler descricao completa
-- Para as demais: titulo + tags bastam na primeira passada. Se ficar na duvida do bucket, ai sim leia a descricao
+- Para cada ideia: use `clickup_get_task` pra ler descricao completa. NUNCA classificar so pelo titulo — muitas ideias tem contexto rico na descricao que muda completamente o bucket
 
 **ClickUp — ja publicados (ultimos 30 dias):**
 - Use `clickup_filter_tasks` na list {{clickup_list_id}} com MULTIPLOS statuses: "Publicado", "Concluido", "Done", "Fechado" (testar os que existirem)
@@ -184,9 +183,15 @@ NAO execute NADA sem aprovacao explicita.
 
 Apos aprovacao, executar SOMENTE o que foi aprovado:
 
-**Tags:**
-- Use `clickup_add_tag_to_task` pra adicionar tags de pilar e maturidade
+**Pilar (custom field):**
+- Use `clickup_update_task` com `custom_fields` pra setar o pilar de conteudo
+- O campo "Pilar de Conteudo" e um dropdown (custom field) — ID e opcoes estao no config-social.md
+- NAO usar tags pra pilar — pilar e custom field
+
+**Maturidade (tags):**
+- Use `clickup_add_tag_to_task` pra adicionar tags de maturidade (`pronta`, `desenvolvida`, `pepita`)
 - Use `clickup_remove_tag_from_task` pra remover tags incorretas
+- Antes de aplicar, verificar quais tags ja existem no Space com `clickup_get_custom_fields` ou tentativa
 
 **Enriquecimento:**
 - Use `clickup_update_task` pra atualizar descricao das ideias desenvolvidas (adicionar pontos sugeridos)
