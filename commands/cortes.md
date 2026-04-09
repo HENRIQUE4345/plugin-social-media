@@ -628,9 +628,30 @@ frames = segundos × timebase
 24fps:    timebase = 24, ntsc = FALSE
 ```
 
+### Deteccao de audio (OBRIGATORIO antes de gerar XMEML)
+
+Antes de gerar o XML, detectar o numero de canais de audio do video fonte:
+
+```bash
+ffprobe -v error -select_streams a:0 -show_entries stream=channels,sample_rate -of default=noprint_wrappers=1:nokey=0 "[CAMINHO_VIDEO]"
+```
+
+Guardar os valores:
+- `audio_channels` = numero de canais (1=mono, 2=stereo, 6=5.1)
+- `audio_samplerate` = sample rate (tipicamente 48000 ou 44100)
+
 ### Estrutura XMEML
 
-Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
+Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5.
+
+**REGRA CRITICA DE AUDIO STEREO:** videos de camera/celular SEMPRE tem audio stereo (2 canais). O XMEML DEVE:
+1. Declarar `<channelcount>2</channelcount>` no `<file>` → `<media>` → `<audio>`
+2. Incluir `<samplecharacteristics>` com `<depth>16</depth>` e `<samplerate>[valor]</samplerate>`
+3. Criar **2 tracks de audio** (um por canal: Left e Right)
+4. Cada clipitem de audio DEVE ter `<sourcetrack><mediatype>audio</mediatype><trackindex>[1 ou 2]</trackindex></sourcetrack>`
+5. Clipitems de video DEVEM ter `<sourcetrack><mediatype>video</mediatype><trackindex>1</trackindex></sourcetrack>`
+
+Sem isso, Premiere Pro da erro "Nao e possivel vincular a midia — 2 canais de audio e o clipe foi criado com 1 canal".
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -653,7 +674,6 @@ Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
             <media>
               <video>
                 <track>
-                  <!-- Se reordenado: multiplos clipitems na nova ordem -->
                   <!-- clipitem 1: o hook (do meio do video original) -->
                   <clipitem id="corte-01-hook">
                     <name>Hook</name>
@@ -668,7 +688,28 @@ Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
                         <timebase>[fps]</timebase>
                         <ntsc>[TRUE/FALSE]</ntsc>
                       </rate>
+                      <media>
+                        <video>
+                          <duration>[duracao_total_frames]</duration>
+                          <samplecharacteristics>
+                            <width>[largura]</width>
+                            <height>[altura]</height>
+                          </samplecharacteristics>
+                        </video>
+                        <audio>
+                          <duration>[duracao_total_frames]</duration>
+                          <channelcount>[audio_channels]</channelcount>
+                          <samplecharacteristics>
+                            <depth>16</depth>
+                            <samplerate>[audio_samplerate]</samplerate>
+                          </samplecharacteristics>
+                        </audio>
+                      </media>
                     </file>
+                    <sourcetrack>
+                      <mediatype>video</mediatype>
+                      <trackindex>1</trackindex>
+                    </sourcetrack>
                   </clipitem>
                   <!-- clipitem 2: contexto -->
                   <clipitem id="corte-01-contexto">
@@ -678,6 +719,10 @@ Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
                     <in>[contexto_source_start_frames]</in>
                     <out>[contexto_source_end_frames]</out>
                     <file id="file-1"/>
+                    <sourcetrack>
+                      <mediatype>video</mediatype>
+                      <trackindex>1</trackindex>
+                    </sourcetrack>
                   </clipitem>
                   <!-- clipitem 3: payoff -->
                   <clipitem id="corte-01-payoff">
@@ -687,12 +732,45 @@ Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
                     <in>[payoff_source_start_frames]</in>
                     <out>[payoff_source_end_frames]</out>
                     <file id="file-1"/>
+                    <sourcetrack>
+                      <mediatype>video</mediatype>
+                      <trackindex>1</trackindex>
+                    </sourcetrack>
                   </clipitem>
                 </track>
               </video>
               <audio>
+                <!-- Audio Track 1 (Left) — espelhar clipitems do video com mesmos tempos -->
                 <track>
-                  <!-- espelhar clipitems do video com mesmos tempos -->
+                  <clipitem id="corte-01-hook-a1">
+                    <name>Hook</name>
+                    <start>0</start>
+                    <end>[hook_duracao_frames]</end>
+                    <in>[hook_source_start_frames]</in>
+                    <out>[hook_source_end_frames]</out>
+                    <file id="file-1"/>
+                    <sourcetrack>
+                      <mediatype>audio</mediatype>
+                      <trackindex>1</trackindex>
+                    </sourcetrack>
+                  </clipitem>
+                  <!-- demais clipitems com sourcetrack trackindex=1 -->
+                </track>
+                <!-- Audio Track 2 (Right) — se audio_channels >= 2 -->
+                <track>
+                  <clipitem id="corte-01-hook-a2">
+                    <name>Hook</name>
+                    <start>0</start>
+                    <end>[hook_duracao_frames]</end>
+                    <in>[hook_source_start_frames]</in>
+                    <out>[hook_source_end_frames]</out>
+                    <file id="file-1"/>
+                    <sourcetrack>
+                      <mediatype>audio</mediatype>
+                      <trackindex>2</trackindex>
+                    </sourcetrack>
+                  </clipitem>
+                  <!-- demais clipitems com sourcetrack trackindex=2 -->
                 </track>
               </audio>
             </media>
@@ -716,7 +794,10 @@ Gerar o XML completo seguindo o formato FCP 7 XMEML versao 5:
 - `start`/`end` = posicao no TIMELINE (cumulativo, na ordem nova)
 - `in`/`out` = posicao no ARQUIVO FONTE (timestamps originais convertidos pra frames)
 - Referenciar o mesmo `<file id>` em todos os clipitems
-- Audio track espelha video track (mesmos in/out/start/end)
+- Primeiro clipitem de video define o `<file>` completo (com `<media>`, `<channelcount>`, `<samplecharacteristics>`)
+- Criar N tracks de audio = `audio_channels` do ffprobe (geralmente 2 pra stereo)
+- Cada audio clipitem DEVE ter `<sourcetrack>` com `trackindex` correspondente ao canal
+- Cada video clipitem DEVE ter `<sourcetrack>` com `mediatype=video` e `trackindex=1`
 - Pathurl usa formato `file:///` com caminho absoluto (barras normais, nao backslash)
 
 Salvar em: `{{materiais}}/cortes-YYYY-MM-DD.xml`

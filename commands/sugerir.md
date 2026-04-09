@@ -147,6 +147,14 @@ PADROES DE HOOK:
 
 Este e o passo que gera valor. NAO pule, NAO simplifique.
 
+### REGRA DE TERRITORIO (CRITICA)
+
+Antes de gerar qualquer angulo, aplicar o filtro:
+- **Fala COM empresario/gestor?** → angulo do Marco, NAO do {{criador}}. Descartar.
+- **Mostra BASTIDOR de como pensa/constroi?** → angulo do {{criador}}. Manter.
+- **Linguagem de dev (codar, deploy, programar)?** → reescrever como Arquiteto (pensar, orquestrar, construir).
+- **Repacoteia angulo de concorrente?** → NAO usar. O {{criador}} precisa ter LENTE PROPRIA (opiniao, vivencia, dado pessoal).
+
 ### 3A) Radar x Lentes — angulos novos
 
 Para CADA tendencia quente, testar contra as lentes mais relevantes:
@@ -201,6 +209,11 @@ buscar sessoes mais antigas (ate 60 dias) que tenham historias de vida catalogad
 
 Cruzar com tendencias: "essa historia da um angulo forte pra essa tendencia?"
 
+**CLASSIFICAR cada pepita como:**
+- **AGORA** — tem timing do radar, acontecimento recente (<2 semanas), ou serie em andamento. Entra no cardapio.
+- **BANCO** — historia forte sem timing. Fica na secao "banco" do cardapio. Nao forcar no mes so pra preencher pilar.
+Pepitas AGORA > pepitas BANCO. Nunca forcear historia sem timing so porque o pilar esta fraco — buscar OUTRO angulo com timing.
+
 ### REGRA DE DEDUPLICACAO (CRITICA)
 
 Antes de promover uma historia/pepita a sugestao de GRAVACAO NOVA:
@@ -242,11 +255,12 @@ ANGULO: "TDAH e vantagem (CEO Palantir) + meu HD de 1GB"
 
 Apresente os angulos com CONTEXTO SUFICIENTE pro criador avaliar sem adivinhar.
 
-Cada sugestao DEVE ter 4 campos obrigatorios alem do titulo:
+Cada sugestao DEVE ter 5 campos obrigatorios alem do titulo:
 - **Contexto:** 2-3 linhas explicando de onde veio a ideia, qual a tese central, por que e relevante agora
 - **Fonte:** arquivo/radar/sessao especifico (caminho do arquivo)
 - **Diferencial:** o que torna unico vs o que concorrentes ja fizeram sobre o tema
 - **Cruzamento:** qual tendencia x qual lente x qual hook
+- **CTA potencial:** Yabadoo lista espera | lead magnet via ManyChat | nenhum (identificar ANTES do cardapio quais angulos puxam CTA natural)
 
 ```
 ## Angulos gerados — [Periodo]
@@ -272,11 +286,13 @@ Cada sugestao DEVE ter 4 campos obrigatorios alem do titulo:
    Timing: [tendencia que ativou]
 
 ### Pepitas do cerebro (historias/vivencias)
-1. "[Frase-angulo]" — **[Pilar]**
+1. "[Frase-angulo]" — **[Pilar]** — **[AGORA/BANCO]**
    Contexto: [2-3 linhas: qual historia, resultado concreto, emocao]
    Fonte: [sessao especifica — caminho do arquivo]
    Diferencial: [vivencia propria, nao teoria]
+   Timing: [por que AGORA — ou "sem timing, banco"]
    Hook: [padrao]
+   CTA potencial: [Yabadoo lista espera / lead magnet / nenhum]
 
 ### Cortes de material existente [CORTE EXISTENTE]
 1. "[Frase-angulo]" — **[Pilar]**
@@ -500,6 +516,9 @@ Meta: 35/25/25/15 | Desvio: [OK / rebalancear X]
 - [ ] Cada item tem contexto + fonte + diferencial?
 - [ ] Nenhum tema repetido de cardapios anteriores?
 - [ ] Pelo menos 50% dos angulos sao NOVOS (nao existiam no backlog)?
+- [ ] Minimo 3 screencasts/demos no mes (Reels [DEMO] + TikToks [DEMO])? Builder mostrando tela e o gap #1 do nicho.
+- [ ] Angulos com potencial CTA Yabadoo identificados? (lista espera, lead magnet, ManyChat)
+- [ ] Nenhum angulo "fala COM empresario"? (territorio do Marco, nao do {{criador}})
 
 ### NAO inclui (vem depois)
 - Cortes IG (11/sem) → /social-cortes apos transcricao
