@@ -89,23 +89,41 @@ Busque actor de trending topics no Apify Store (ex: `motivated_fellow/x-twitter-
 - Filtrar manualmente por IA/tech/inovacao
 - Se nao encontrar actor adequado: registrar "X/Twitter indisponivel" e continuar
 
-### Camada 5 — Portais de noticias IA
+### Camada 5 — Pique News (briefings ja curados)
 
-Use `apify/rag-web-browser` pra cada fonte:
+**Fonte primaria — NAO re-scrapar noticias.** O `/pique-news:news` roda diariamente e ja faz o scrape + curadoria das mesmas fontes (Rundown, OpenAI, Anthropic, Google AI, Tecnoblog, Ben's Bites). Aproveitar esse trabalho em vez de duplicar.
 
-**Breaking news (pegar primeiro):**
+**Fonte A — Drive local (Claude Code com Drive sincronizado):**
+
+1. **Glob** `G:/Drives compartilhados/Pique Digital/Pique Digital/Pique News/*-pique-news.html`
+2. Se a pasta nao existir ou nao retornar resultados: tentar Fonte B.
+3. Ordenar por data no nome, pegar os 7 mais recentes (semana de noticias).
+
+**Fonte B — docs.pique.digital via WebFetch (fallback se Drive indisponivel):**
+
+1. **WebFetch** `https://docs.pique.digital/publico/pique/news/?json` — retorna JSON com lista de briefings publicados.
+2. Ordenar por data, pegar os 7 mais recentes.
+3. Pra cada um, **WebFetch** `https://docs.pique.digital/publico/pique/news/{slug}/` — traz o HTML.
+
+**Extracao (comum as 2 fontes):**
+
+Pra cada HTML, ler o bloco `<!-- PIQUE-NEWS-METADATA ... -->` no final (eficiente) ou parsear `.news-headline`, `.news-insight`, `.gap-title` (fallback).
+
+**Extrair dos ultimos 7 dias:**
+- Noticias-chave ja curadas (campo `noticias-chave` do metadata)
+- Tendencias ativas (campo `tendencias-ativas`)
+- Gaps abertos (campo `gaps-abertos`)
+- Manchetes do dia (campo `manchete`)
+
+**Filtro de angulo criador:** o Pique News cura pela lente Pique+Yabadoo (empresa). Voce precisa re-filtrar pela lente do {{perfil}} (criador) — nem toda noticia que impacta a empresa vira conteudo pessoal. Manter so as que encaixam em algum pilar do {{perfil}}.
+
+**Fallback se Pique News indisponivel:** se Drive + docs.pique.digital falharem, cair pro scraping direto das fontes:
 - The Rundown AI — https://www.therundown.ai/
-- OpenAI Blog — https://openai.com/blog
 - Anthropic Blog — https://www.anthropic.com/news
+- OpenAI Blog — https://openai.com/blog
 - Google AI Blog — https://blog.google/technology/ai/
-
-**BR (saber o que o publico ja viu):**
-- Tecnoblog — https://tecnoblog.net/tema/inteligencia-artificial/
-
-**Opiniao/profundidade:**
 - Ben's Bites — https://bensbites.com/
-
-Extrair: titulo, resumo, data, relevancia pro {{perfil}}.
+Mas so como ultimo recurso — registrar "Pique News indisponivel, usando scrape direto".
 
 ### Fallback por camada
 
