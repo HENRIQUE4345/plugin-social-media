@@ -72,7 +72,68 @@ Antes de gerar qualquer combo, extraia das analises:
 
 Monte internamente uma TABELA de referencia antes de gerar combos. NAO pule esse passo.
 
+## Passo 1.5 — Carregar brief do angulo (se existir)
+
+A `/social-sugerir` pode ter gerado um **brief estruturado de 7 blocos** pra este angulo. Se existir, a skill vira executora: nao re-classifica pilar, nao reinventa angulo, nao muda tese. So expande o `hook_seed` em combos concretos e aplica padroes de copy.
+
+**Busca do brief:**
+
+1. Glob `{{materiais}}/conteudo-*-content.json` — pegar o mes corrente (o mais recente)
+2. Se existir, ler o arquivo
+3. Tentar casar o angulo por:
+   - Identificador passado explicitamente pelo usuario (ex: "rodar copy no angulo #3 do cardapio de abril")
+   - Tema/frase-angulo que o usuario mencionou ao invocar a skill
+   - Se a invocacao foi `/social-copy` sem contexto: listar todos os angulos com `status: suggested` e perguntar "Qual angulo? (N/titulo)" — ESPERAR resposta
+4. Se achar um item com sub-objeto `brief`, setar `BRIEF_MODE = true` e armazenar o brief completo na memoria de trabalho
+5. Se nao achar, `BRIEF_MODE = false` (modo legado)
+
+**Se `BRIEF_MODE = true`:** imprimir um resumo do brief antes de continuar:
+
+```
+BRIEF CARREGADO — Angulo: "[brief.angulo]"
+
+Tese: [brief.tese]
+Pilar: [pillar do item pai]
+Formula empirica: [brief.formula_empirica.nome] ([brief.formula_empirica.performance])
+Hook seed: "[brief.formula_empirica.hook_seed]"
+Camada negocio: [brief.negocio.nivel] → [brief.negocio.alvo]
+  Como aparece: [brief.negocio.como_aparece]
+Destino: [brief.handoff.destino]
+
+Material de apoio (sera lido antes de gerar combos):
+  [lista de caminhos]
+```
+
+Depois, **ler os arquivos listados em `brief.material_apoio[]`** pra ter o contexto necessario pra gerar combos. Essa leitura e PRIORITARIA sobre a extracao generica do Passo 1.
+
+**Se `BRIEF_MODE = false`:** seguir o modo legado (Passos 1, 2, 3 completos).
+
 ## Passo 2 — Receber e analisar a transcricao
+
+**Se `BRIEF_MODE = true`:**
+
+O angulo, tese, pilar e formula empirica JA vem prontos do brief. NAO re-classifique pilar. NAO reinvente angulo. Use a transcricao APENAS como **fonte de frases literais do criador** — frases que ele realmente falou e que se encaixam no `hook_seed` do brief ou alimentam a tese.
+
+Apresente:
+
+```
+ANALISE DA TRANSCRICAO (modo brief)
+
+Brief base: "[brief.angulo]"
+Tese (do brief): [brief.tese]
+Hook seed (do brief): "[brief.formula_empirica.hook_seed]"
+
+Frases do criador que encaixam:
+1. "[frase literal 1]"
+2. "[frase literal 2]"
+3. "[frase literal 3]"
+
+Frase mais forte pra expandir o hook_seed: "[frase]"
+```
+
+NAO sugerir angulos alternativos. NAO mudar tese. O brief e imutavel.
+
+**Se `BRIEF_MODE = false` (modo legado):**
 
 O usuario vai colar a transcricao. Analise:
 
@@ -101,6 +162,22 @@ NAO espere aprovacao aqui. Siga direto pro Passo 3.
 ## Passo 3 — Gerar combos
 
 Gere 3-5 COMBOS. Cada combo e uma unidade completa: headline + legenda + justificativa.
+
+### REGRA DE BRIEF (se `BRIEF_MODE = true`)
+
+Quando ha brief carregado no Passo 1.5, cada combo DEVE:
+
+1. **Respeitar o `hook_seed`** como ponto de partida. Nao inventar angulo alternativo. Os 3-5 combos sao VARIACOES do hook_seed expandido pra formatos de headline diferentes — nao sao 3-5 angulos diferentes.
+2. **Respeitar `brief.formula_empirica.nome`**. Se o brief definiu "Storytelling 1a pessoa", todos os combos seguem esse padrao. Nao usar outras formulas.
+3. **Respeitar `brief.negocio.nivel`**:
+   - `nenhuma`: NAO mencionar Yabadoo/Pique na legenda. Zero mencao ao produto.
+   - `ambiente`: produto so aparece no bastidor (ex: "o cerebro que construi pra mim" enquanto conta a historia). Nunca como tema.
+   - `indireta`: produto aparece como exemplo/ilustracao mas nao e o foco. Pode mencionar nome.
+   - `direta`: produto e o tema. CTA pode ser direta pro produto (lista espera, beta, etc).
+4. **Usar `brief.negocio.como_aparece`** como orientacao literal de linguagem pra mencao do produto.
+5. **Usar `brief.visao.trecho`** como base pra vocabulario/tom — o criador ja escreveu assim, so adaptar pra copy de post.
+
+**Se `BRIEF_MODE = false`** (modo legado), seguir as regras abaixo livremente.
 
 ### Regras de HEADLINE (texto na tela do video)
 

@@ -41,7 +41,41 @@ Leia estes arquivos em paralelo:
 
 Se algum arquivo nao existir, continue sem ele. Nao trave.
 
-## Passo 2 — Analisar o input
+## Passo 1.5 — Carregar brief do angulo (se existir)
+
+A `/social-sugerir` pode ter gerado um **brief estruturado de 7 blocos** pra este carrossel. Se existir, a skill vira executora: nao re-classifica pilar, nao reinventa angulo, nao muda tese, segue o `formato_narrativo` e `slides_estimados` do hint.
+
+**Busca do brief:**
+
+1. Glob `{{materiais}}/conteudo-*-content.json` — pegar o mes corrente (o mais recente)
+2. Se existir, ler o arquivo
+3. Tentar casar o carrossel por:
+   - Identificador passado explicitamente pelo usuario (ex: "rodar carrossel no angulo #3 do cardapio de abril")
+   - Tema/frase-angulo que o usuario mencionou
+   - Se a invocacao foi `/social-carrossel` sem contexto: listar carrosseis com `status: suggested` e `brief.handoff.destino = carrossel`, perguntar "Qual carrossel? (N/titulo)" — ESPERAR resposta
+4. Se achar item com sub-objeto `brief`, setar `BRIEF_MODE = true` e armazenar o brief
+5. Se nao achar, `BRIEF_MODE = false` (modo legado)
+
+**Se `BRIEF_MODE = true`:** imprimir resumo:
+
+```
+BRIEF CARREGADO — Carrossel: "[brief.angulo]"
+
+Tese: [brief.tese]
+Pilar: [pillar]
+Formula empirica: [brief.formula_empirica.nome] ([brief.formula_empirica.performance])
+Hook seed: "[brief.formula_empirica.hook_seed]"
+Camada negocio: [brief.negocio.nivel] → [brief.negocio.alvo]
+  Como aparece: [brief.negocio.como_aparece]
+Formato narrativo: [brief.handoff.hints.formato_narrativo]
+Slides estimados: [brief.handoff.hints.slides_estimados]
+```
+
+Depois, **ler os arquivos de `brief.material_apoio[]`** pra ter contexto. Pular pro Passo 3 direto — nao rodar Passo 2 (analise do input), o brief ja tem tudo.
+
+**Se `BRIEF_MODE = false`:** seguir o modo legado (Passos 2, 3 completos).
+
+## Passo 2 — Analisar o input (so se BRIEF_MODE=false)
 
 O usuario vai fornecer um dos seguintes:
 - **Tema solto** ("faz um carrossel sobre X")
@@ -65,6 +99,23 @@ Slides estimados: [N]
 NAO espere aprovacao aqui. Siga direto pro Passo 3.
 
 ## Passo 3 — Estruturar os slides
+
+### REGRA DE BRIEF (se `BRIEF_MODE = true`)
+
+Quando ha brief carregado no Passo 1.5:
+
+1. **Seguir `brief.handoff.hints.formato_narrativo`** — nao re-escolher o arco. Se brief diz `historia→framework`, estrutura os slides nesse arco.
+2. **Respeitar `brief.handoff.hints.slides_estimados`** como alvo (+-1 slide, nao mais). Se brief diz 7 slides, entregar 6-8.
+3. **Slide 1 (HOOK) parte de `brief.formula_empirica.hook_seed`**. Nao inventar headline alternativo. Pode encurtar/adaptar pra caber em 3-7 palavras, mas manter a TESE.
+4. **Slides intermediarios desenvolvem `brief.tese`**. Usar `brief.visao.trecho` como fonte de vocabulario/historia. Se brief.visao.tipo e "historia", a historia VAI ter um slide dedicado.
+5. **Slide final (CTA)** respeita `brief.negocio.nivel`:
+   - `nenhuma`: CTA generica (SALVA / COMENTA / MANDA), zero mencao ao produto
+   - `ambiente`: produto aparece so no final do ultimo slide como bastidor (ex: "construido com o meu Yabadoo")
+   - `indireta`: produto aparece como exemplo em 1 slide especifico (nao o final)
+   - `direta`: slide dedicado ao produto + CTA direta (lista espera/beta)
+6. **Caption (Passo 5) segue as mesmas regras do copy.md Passo 3 — respeitar `brief.negocio.nivel`, usar `brief.formula_empirica.hook_seed` como semente.
+
+**Se `BRIEF_MODE = false`** (modo legado), seguir as regras abaixo livremente.
 
 Crie a estrutura completa, slide por slide:
 
