@@ -1,5 +1,5 @@
 ---
-description: Monta o cardapio mensal de conteudo — cruza radar + topicos + analises pra gerar angulos criativos. Modo mes (padrao) ou semana.
+description: Monta o cardapio mensal de conteudo — cruza radar + cerebro vivo + analises pra gerar angulos criativos. Modo mes (padrao) ou semana.
 allowed-tools: Agent, Read, Write, Edit, Glob, Grep
 ---
 
@@ -17,12 +17,14 @@ Seu trabalho NAO e reorganizar ideias que ja existem. E GERAR ANGULOS NOVOS cruz
 A logica central:
 
 ```
-TENDENCIA QUENTE (radar)  x  LENTE DO CRIADOR (42 topicos)  x  PADRAO DE HOOK (analises)
+TENDENCIA QUENTE (radar)  x  VOZ DO CRIADOR (cerebro vivo)  x  PADRAO DE HOOK (analises)
                                     =
                           ANGULO CRIATIVO UNICO
 ```
 
 Nenhuma dessas 3 fontes gera bom conteudo sozinha. O valor esta no CRUZAMENTO.
+
+A "VOZ DO CRIADOR" NAO e uma lista congelada de topicos. E busca viva no cerebro (sessoes + conhecimento + projeto + playbooks) targeted pelas tendencias quentes do radar. Opinioes, frameworks e historias sao extraidos **dinamicamente** dos arquivos que existem hoje — nao de um arquivo-indice estatico.
 
 Funciona em dois modos:
 - **Mes** (padrao): planeja 4 semanas. Slots que dependem de timing ficam como `RADAR — preencher com /social-radar da semana`
@@ -42,11 +44,14 @@ Valores do config disponiveis como variaveis:
 - `{{perfil}}` — handle Instagram | `{{criador}}` — nome do criador | `{{editor}}` — editor de video
 - `{{pasta_projeto}}` — pasta raiz do projeto | `{{contexto}}` — arquivo de contexto consolidado
 - `{{estrategia}}` — estrategia de conteudo | `{{identidade_visual}}` — identidade visual
-- `{{topicos}}` — topicos de conteudo | `{{referencias}}` — perfis de referencia
+- `{{referencias}}` — perfis de referencia
 - `{{analises}}` — pasta de analises | `{{materiais}}` — pasta de materiais
 - `{{clickup_list_id}}` — ClickUp list ID | `{{sessoes}}` — pasta de sessoes | `{{conhecimento}}` — pasta de conhecimento
+- `{{cf_origem_id}}` — custom field ID Origem | `{{cf_semente_id}}` — custom field ID Semente (opcionais — usados no Passo 1 se presentes no config)
 
 Substitua os `{{placeholders}}` pelos valores reais do config ao longo da skill.
+
+**Observacao:** a variavel `{{topicos}}` foi removida. A fonte de opinioes do criador agora e o cerebro vivo (busca dinamica no Passo 2D), nao um arquivo-indice estatico.
 
 ### 0.2 — Rampa de tempo (recomendacao de modo)
 
@@ -87,7 +92,7 @@ Leia estes arquivos simultaneamente:
 
 **Camada VISAO do criador — 4 fontes paralelas:**
 
-1. **42 lentes/topicos:** `{{topicos}}` (ou fallback em `arquivo/topicos-conteudo-henrique.md` se marcado como "arquivado — cerebro e a fonte viva") — cada topico e uma LENTE com opiniao propria
+1. **Opinioes fortes do criador (cerebro vivo):** NAO carregar agora — a busca e targeted por tendencia e roda no Passo 2D apos o radar ser extraido. Aqui, apenas pre-listar os escopos de busca disponiveis (para dar ao Passo 2D): `{{pasta_projeto}}/**/*.md`, `{{sessoes}}/*download*.md`, `{{sessoes}}/*brainstorm*.md`, `{{conhecimento}}/**/*.md`, `arquivo/topicos-conteudo-henrique.md` (fonte historica — um dos N arquivos possiveis, nao mais a fonte unica).
 2. **Playbook do criador:** busque via Glob `pique/playbooks/playbook-{{criador}}.md` ou `pique/playbooks/*playbook*{{perfil_sem_@}}*.md` — principios anti-TDAH, autoconhecimento, frameworks de trabalho
 3. **Contexto consolidado (bloco de negocio):** `{{contexto}}` — PRESTAR ATENCAO em secoes chamadas "Como [produto] Aparece no Conteudo", "Nota sobre conteudo como motor", "Estrutura de Negocio". Sao os padroes literais de como Yabadoo/Pique aparecem (ex: "bastidor", "segundo cerebro que construi pra mim")
 4. **Banco de historias nas sessoes:** busque `{{sessoes}}/*download*.md` e `{{sessoes}}/*workshop*.md`. Para cada arquivo, abrir e buscar DENTRO por:
@@ -112,8 +117,18 @@ Leia estes arquivos simultaneamente:
 - `{{analises}}/*cardapio*.md` — evitar repetir
 
 **ClickUp (ingredientes brutos):**
-- Use `clickup_filter_tasks` na list {{clickup_list_id}} com status "{{clickup_status_ideia}}" (as 20 mais recentes)
+- Use `clickup_filter_tasks` na list {{clickup_list_id}} com status "{{clickup_status_ideia}}" (as 20 mais recentes) — incluir `include_custom_fields: true` na chamada
 - Use `clickup_filter_tasks` com status "{{clickup_status_publicado}}" + include_closed (ultimos 14 dias) — pra NAO repetir
+
+**Attribution das ideias brutas (opcional, so se config tem os IDs):**
+
+Se `{{cf_origem_id}}` e `{{cf_semente_id}}` estao definidos no config, ao ler cada task, capturar o valor dos 2 custom fields:
+- `Origem` (dropdown): valor do campo — ex. `Marco`, `Seguidor`, `Propria`, `Conversa`
+- `Semente` (short_text): referencia livre — ex. `sessoes/2026-03-22-reuniao-marco.md:L44`
+
+Essas informacoes ficam amarradas a cada ideia bruta e sao usadas no Passo 3B pra preencher `atribuicao.origem` como `ideia-clickup (origem original: Marco)` e `atribuicao.semente` herdando a semente registrada na task.
+
+Se os IDs NAO estao no config, pular silenciosamente — a skill continua funcionando sem attribution das ideias brutas (todas viram `origem: ideia-clickup` sem detalhe da origem original).
 
 **YouTube (validacao de demanda):**
 - Busque `{{conhecimento}}/*youtube*` ou `{{conhecimento}}/*yt*` via Glob
@@ -154,9 +169,9 @@ Incluir:
 
 **IMPORTANTE:** So listar tendencias que ESTAO NO ARQUIVO DO RADAR. Se o radar nao menciona um topico, ele NAO e tendencia confirmada.
 
-### B) Universo VISAO do criador (triplo)
+### B) Universo VISAO do criador (triplo dinamico)
 
-Em vez de tratar "42 topicos" como lista plana, montar TRES listas separadas — cada tipo e usado pra cruzamento diferente:
+Montar TRES listas separadas a partir do cerebro vivo — cada tipo e usado pra cruzamento diferente. Todas sao extraidas dinamicamente (nada de lista congelada):
 
 #### B.1 — `FRAMEWORKS_PROPRIOS[]` (tese estrutural)
 
@@ -172,9 +187,11 @@ Conceitos/sistemas/principios que o criador articulou como seus. Cada um tem nom
 ```
 - nome: "Engenharia de Contexto"
   descricao: "IA e dados + contexto. Contexto explica dados. Prompt bonito nao salva."
-  fonte: arquivo/topicos-conteudo-henrique.md linha 18
+  fonte: sessoes/2026-02-21-1800-brainstorm-agente-cerebro.md:L47
   trecho: "Prompt bonito nao salva. O que muda o jogo e MAPEAR e ESTRUTURAR contexto..."
 ```
+
+**Importante:** `fonte` deve apontar pra um arquivo REAL que voce leu nesta sessao (`caminho:Llinha`). NAO reusar exemplos hardcoded — a busca e viva.
 
 Meta: consolidar 4-8 frameworks. Se achar mais, listar os mais fortes primeiro. Se achar menos de 3, avisar no Passo 4.
 
@@ -194,19 +211,24 @@ Historias reais com resultado concreto, vividas pelo criador. Saem das tabelas c
 
 Meta: 10-15 historias. Se encontrar menos, nao forca — e OK ter menos.
 
-#### B.3 — `LENTES_42[]` (opiniao-topico)
+#### B.3 — `OPINIOES_FORTES[]` (opiniao viva do criador)
 
-Os 42 topicos de `{{topicos}}` — cada um e uma opiniao forte sobre um tema especifico.
+Opinioes fortes extraidas por **busca viva targeted pelo radar**. Nao existe lista congelada de N opinioes — o que entra nessa lista depende das tendencias quentes do momento. A busca e cara, entao so rodar APOS ter `TENDENCIAS_QUENTES[]` (Passo 2A) pronto — assim voce busca direcionado, nao o cerebro inteiro.
+
+**Fluxo de extracao (detalhado no Passo 2D):**
+
+Para cada tendencia quente, extrair 2-4 keywords e buscar opinioes fortes nos arquivos do cerebro com essas keywords. Fonte = cerebro vivo, nao arquivo-indice.
 
 **Estrutura por item:**
 ```
-- id: #2
-  titulo: "Engenharia de Contexto, nao Prompt Engineering"
-  opiniao: "[resumo 1 linha]"
-  fonte: arquivo/topicos-conteudo-henrique.md
+- id: "Engenharia de Contexto"
+  opiniao: "[1 linha — a tese do criador]"
+  fonte: "[caminho absoluto]:L[linha]"
+  trecho: "[2-3 linhas copy-paste do arquivo original]"
+  tema_relacionado: "[qual tendencia quente puxou esta opiniao]"
 ```
 
-Carregar TODOS os 42. Sao leves, so titulo + opiniao resumida.
+Meta: 3-8 opinioes por tendencia com cruzamento forte. Se uma tendencia nao encontra nenhuma opiniao no cerebro, marcar como `[SEM_LENTE_NO_CEREBRO]` e ainda tentar cruzar com frameworks/historias. NAO inventar opiniao.
 
 ---
 
@@ -216,7 +238,7 @@ Carregar TODOS os 42. Sao leves, so titulo + opiniao resumida.
 |---|---|---|
 | Radar x Framework | `FRAMEWORKS_PROPRIOS[]` | Angulo de tese estrutural ("explicar mundo com o framework X") |
 | Radar x Historia | `HISTORIAS_CATALOGADAS[]` | Angulo de storytelling 1a pessoa ("aquele dia que vivi X conecta com esse tema") |
-| Radar x Lente | `LENTES_42[]` | Angulo de opiniao forte ("tema quente sob a lente #N") |
+| Radar x Opiniao | `OPINIOES_FORTES[]` | Angulo de opiniao forte ("tema quente sob a lente do criador") |
 | Historia x Tema de negocio | `HISTORIAS_CATALOGADAS[]` | Angulo autentico com mensagem de negocio embutida como bastidor |
 
 ### C) Formulas empiricas (hooks com numero real)
@@ -247,9 +269,9 @@ FALLBACK — formulas nao validadas empiricamente nesta sessao:
 - Vulnerabilidade + sistema
 ```
 
-### D) Extrair frameworks, historias e lentes (passo operacional)
+### D) Extrair frameworks, historias e opinioes fortes (passo operacional)
 
-Este passo so roda se os arquivos do Passo 1 foram carregados com sucesso. Saida: 3 listas internas (`FRAMEWORKS_PROPRIOS[]`, `HISTORIAS_CATALOGADAS[]`, `LENTES_42[]`).
+Este passo so roda se os arquivos do Passo 1 foram carregados com sucesso E as tendencias quentes do Passo 2A estao extraidas. Saida: 3 listas internas (`FRAMEWORKS_PROPRIOS[]`, `HISTORIAS_CATALOGADAS[]`, `OPINIOES_FORTES[]`).
 
 **Frameworks — regras de extracao:**
 
@@ -258,7 +280,7 @@ Dos arquivos do playbook + contexto + yabadoo + sessoes-download, buscar por:
 - Secoes com heading tipo "Framework", "Principio", "Conceito", "Modelo mental"
 - Blocos onde o criador articula "X = Y" (definicoes proprias)
 
-Candidatos validos devem ter NOME + definicao de 1-2 linhas. Descarta nomes genericos ("produtividade", "foco") — so conceitos NOMEADOS e DISTINTIVOS.
+Candidatos validos devem ter NOME + definicao de 1-2 linhas + `fonte: caminho:Llinha`. Descarta nomes genericos ("produtividade", "foco") — so conceitos NOMEADOS e DISTINTIVOS.
 
 **Historias — regras de extracao:**
 
@@ -269,12 +291,36 @@ Dos arquivos de sessao encontrados no Passo 1:
 
 NAO ler sessoes inteiras em prosa procurando por narrativas — e custoso e impreciso. So tabelas/listas explicitas.
 
-**Lentes — regras de extracao:**
+**Opinioes fortes — busca viva targeted (NAO lista estatica):**
 
-De `{{topicos}}` (ou fallback em `arquivo/topicos-conteudo-henrique.md`):
-- Cada heading `### N. "Titulo"` vira um item
-- Extrair numero, titulo, primeira linha do corpo (resumo da opiniao)
-- Carregar todos os 42 (ou quantos tiver)
+Este e o bloco que substituiu o antigo "carregar 42 topicos". Fluxo:
+
+1. **Para cada `TENDENCIA_QUENTE` do Passo 2A**, extrair 2-4 keywords do tema.
+   - Exemplo: tendencia "Claude Code dominando" → keywords: `Claude Code`, `agentes`, `engenharia contexto`, `ferramentas IA`
+
+2. **Glob nos escopos do cerebro vivo:**
+   - `{{pasta_projeto}}/**/*.md` — projeto do criador inteiro
+   - `{{sessoes}}/*download*.md` + `{{sessoes}}/*brainstorm*.md` — pegar os dos ultimos 90 dias (pelo nome YYYY-MM-DD)
+   - `{{conhecimento}}/**/*.md` — todas as subpastas por subtema
+   - `pique/playbooks/playbook-{{criador}}.md`
+   - `arquivo/topicos-conteudo-henrique.md` — fonte historica permitida (um dos N arquivos, nao mais o unico)
+
+3. **Grep nos arquivos encontrados por padroes de opiniao forte** em torno das keywords:
+   - Headings em aspas: `### "..."` ou `### N. "..."`
+   - Negrito em primeira pessoa: `**"eu acho / na minha visao / o problema e..."**`
+   - Quotes (linhas iniciando com `>`)
+   - Secoes com heading tipo `Opiniao`, `Tese`, `Ponto de vista`, `Visao`, `Critica`, `Hot take`
+
+4. **Extrair ate 5 opinioes mais fortes por tendencia.** Priorizar:
+   - Opinioes em primeira pessoa ("eu acho", "na minha visao")
+   - Opinioes com contraste ("todo mundo faz X, mas o certo e Y")
+   - Opinioes com data recente (sessao mais nova > arquivo antigo)
+
+5. **Consolidar em `OPINIOES_FORTES[]`** com a estrutura definida no Passo 2B.3 (`id`, `opiniao`, `fonte: caminho:Llinha`, `trecho`, `tema_relacionado`).
+
+**Fallback:** se uma tendencia quente nao encontra opiniao forte no cerebro, marcar como `[SEM_LENTE_NO_CEREBRO]`. NAO inventar. O Passo 3A ainda pode cruzar essa tendencia com `FRAMEWORKS_PROPRIOS[]` ou `HISTORIAS_CATALOGADAS[]`.
+
+**REGRA DE RASTREABILIDADE:** cada item de `OPINIOES_FORTES[]` DEVE ter `fonte: caminho:Llinha` apontando pra arquivo real que voce leu nesta sessao. Sem fonte = nao incluir.
 
 ### E) Extrair formulas empiricas (passo operacional)
 
@@ -308,7 +354,7 @@ Antes de gerar qualquer angulo, aplicar o filtro:
 
 ### 3A) Radar x VISAO — angulos novos
 
-Para CADA tendencia quente, cruzar contra OS TRES TIPOS de VISAO (framework, historia, lente). Cada tipo gera um angulo com perfil diferente.
+Para CADA tendencia quente, cruzar contra OS TRES TIPOS de VISAO (framework, historia, opiniao forte). Cada tipo gera um angulo com perfil diferente.
 
 ```
 TENDENCIA: [Ex: "Claude Code dominando 4/10 perfis"]
@@ -317,17 +363,20 @@ TENDENCIA: [Ex: "Claude Code dominando 4/10 perfis"]
     "Todo mundo postando sobre Claude Code. Ninguem explicou que
      o segredo nao e a ferramenta — e o CONTEXTO que voce da."
     → tese estrutural — angulo explicativo
+    fonte_visao: sessoes/2026-02-21-1800-brainstorm-agente-cerebro.md:L47
 
   x HISTORIA "Beco 185k lancamentos":
     "Rodei Claude Code em cima de 185 mil lancamentos financeiros
      do Beco. Achei 1.687 anomalias que ninguem viu. A ferramenta
      foi a mesma que todo mundo usa — mudou o contexto."
     → storytelling 1a pessoa — angulo com resultado real
+    fonte_visao: sessoes/2026-03-12-2300-download-jornada-completa.md:L322
 
-  x LENTE #42 "IA e burra por sua culpa":
+  x OPINIAO FORTE "IA e dados + contexto":
     "Ta digitando prompt no Claude Code? Por isso teu resultado
      e generico. Fala com ele — teclado e interface de 1870."
     → opiniao forte — angulo provocativo
+    fonte_visao: arquivo/topicos-conteudo-henrique.md:L29
 
   → 3 angulos candidatos, cada um com perfil distinto
   → aplicar filtro de negocio (Passo 3F) em cada um antes de finalizar
@@ -342,14 +391,18 @@ Para cada ideia bruta do ClickUp, checar se alguma tendencia do radar da TIMING:
 
 ```
 IDEIA: "SaaS vai morrer" (sem timing)
-  + Tendencia: "Manus adquirido pela Meta por $2B" 
-  = "Meta comprou um agente por $2B. SaaS: voce ta ouvindo esse barulho? 
+  + Tendencia: "Manus adquirido pela Meta por $2B"
+  = "Meta comprou um agente por $2B. SaaS: voce ta ouvindo esse barulho?
      E o som da sua industria mudando."
   → AGORA tem timing!
 ```
 
 Ideias que ganham timing sobem de prioridade.
 Ideias sem timing ficam no banco (nao descarta, so adia).
+
+**Attribution do angulo gerado (bloco 8 do brief):**
+- `origem`: `ideia-clickup` (se a task tem custom field `Origem` preenchido, anexar: `ideia-clickup (origem original: <valor>)`)
+- `semente`: lista combinando (a) a `Semente` registrada na task do ClickUp se houver, (b) `ClickUp task #<id>` como referencia, (c) o arquivo do radar que deu o timing — ex. `{{analises}}/2026-04-09-radar-semanal.md:L45`
 
 ### 3C) Sessoes recentes — pepitas de autenticidade
 
@@ -534,10 +587,10 @@ Apresente CADA angulo como um **brief estruturado** com 7 blocos. Este e o CONTR
 - referencia: "[trecho copy-paste do arquivo]" — [caminho do arquivo]
 - por_que_agora: [1 linha de timing concreto]
 
-**3. CAMADA VISAO** (lente do criador)
-- tipo: [framework | historia | lente-topico | opiniao-forte | vivencia]
-- id: [nome/identificador — ex: "Engenharia de Contexto" | "DJ virada 2017" | "Lente #42"]
-- fonte: [caminho absoluto do arquivo]
+**3. CAMADA VISAO** (voz do criador — cerebro vivo)
+- tipo: [framework | historia | opiniao-forte | vivencia]
+- id: [nome/identificador — ex: "Engenharia de Contexto" | "DJ virada 2017" | "IA e dados + contexto"]
+- fonte: [caminho absoluto do arquivo]:L[linha]
 - trecho: "[2-3 linhas copy-paste do material original]"
 
 **4. CAMADA NEGOCIO** (mensagem — do Passo 3F)
@@ -561,8 +614,40 @@ Apresente CADA angulo como um **brief estruturado** com 7 blocos. Este e o CONTR
 - hints:
   [campos especificos por destino — ver tabela do Passo 3G]
 
+**8. ATRIBUICAO** (de onde a ideia nasceu — pra auditoria e post-mortem)
+- origem: [cerebro-vivo | ideia-clickup | sessao-recente | radar-puro | framework-proprio | historia-catalogada | cruzamento-IA]
+- semente:
+  - [caminho:Llinha ou referencia concreta — 1 a 3 itens que alimentaram ESTE angulo especifico]
+
 **Pilar:** [Arquiteto | Visao | TDAH+Sistema | Pessoal]
 ```
+
+**Regras do bloco 8 (ATRIBUICAO):**
+
+| `origem` | Quando usar |
+|---|---|
+| `cerebro-vivo` | Angulo 3A quando VISAO = `OPINIOES_FORTES`, `FRAMEWORKS_PROPRIOS` ou `HISTORIAS_CATALOGADAS` extraidos por busca viva |
+| `ideia-clickup` | Angulo 3B (ClickUp x Radar) — ideia bruta ja existia no ClickUp. Se a task tem custom field `Origem` preenchido, preservar no formato: `ideia-clickup (origem original: Marco)` |
+| `sessao-recente` | Angulo 3C — pepita de sessao dos ultimos 30 dias |
+| `radar-puro` | Raro — quando a tendencia e marcada `[SEM_LENTE_NO_CEREBRO]` e o angulo e gerado sem visao (evitar, sinal de problema) |
+| `framework-proprio` | Sinonimo de `cerebro-vivo` mais especifico — usar quando a semente principal e um framework nomeado |
+| `historia-catalogada` | Sinonimo mais especifico — usar quando a semente e historia do banco |
+| `cruzamento-IA` | Fallback generico quando nao encaixa nos outros |
+
+**`semente` — rastreabilidade obrigatoria:**
+
+A regra de fontes do Passo 2 (secao "REGRA DE FONTES CRITICA") ja obriga rastrear de onde tirou cada coisa. O campo `semente` apenas materializa esse rastro no output. Cada item deve apontar pra um arquivo REAL lido nesta sessao no formato `caminho:Llinha` (ou `ClickUp task #id` pra ideias-clickup).
+
+Exemplo:
+```
+8. ATRIBUICAO
+- origem: cerebro-vivo
+- semente:
+  - sessoes/2026-03-12-2300-download-jornada-completa.md:L322 (historia DJ 2017)
+  - projetos/marca-iairique/analises/2026-04-09-radar-semanal.md:L45 (tendencia Claude Code)
+```
+
+**Regra de validacao:** se `semente` esta vazia, o angulo NAO vai pro cardapio. Sem rastro = skill alucinou = descartar.
 
 **Regras de apresentacao:**
 
@@ -857,9 +942,9 @@ Busque `{{materiais}}/conteudo-*-content.json` do mes correspondente.
       "por_que_agora": "[1 linha]"
     },
     "visao": {
-      "tipo": "framework|historia|lente-topico|opiniao-forte|vivencia",
+      "tipo": "framework|historia|opiniao-forte|vivencia",
       "id": "[nome]",
-      "fonte": "[caminho]",
+      "fonte": "[caminho]:L[linha]",
       "trecho": "[2-3 linhas]"
     },
     "negocio": {
@@ -877,6 +962,12 @@ Busque `{{materiais}}/conteudo-*-content.json` do mes correspondente.
     "handoff": {
       "destino": "carrossel|reel-produzido|tiktok-nativo|gravacao-youtube|gravacao-ancora-ponto|corte-existente",
       "hints": { /* campos especificos por destino */ }
+    },
+    "atribuicao": {
+      "origem": "cerebro-vivo|ideia-clickup|sessao-recente|radar-puro|framework-proprio|historia-catalogada|cruzamento-IA",
+      "semente": [
+        "[caminho:Llinha ou ClickUp task #id]"
+      ]
     }
   }
 }
