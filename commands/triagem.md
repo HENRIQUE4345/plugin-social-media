@@ -1,18 +1,19 @@
 ---
-description: Filtra e organiza o backlog de ideias no ClickUp — classifica por pilar e maturidade, mescla duplicatas, enriquece com cerebro, descarta irrelevantes. Rodar antes do /social-sugerir.
+description: Curadoria negativa de pepitas no ClickUp — descarta irrelevantes, mescla duplicatas, classifica pilar e enriquece descricao. Mantem tasks em status `Pepita`, prontas pra `/social-maturar`.
 allowed-tools: Agent, Read, Write, Edit, Glob, Grep
 ---
 
 ## Delegacao de agents
 
-- **TODAS as operacoes ClickUp** (filtrar, atualizar, tags, comentarios): delegar ao agent `gestor-clickup`
+- **TODAS as operacoes ClickUp** (filtrar, atualizar, comentarios, deletar): delegar ao agent `gestor-clickup`
 
-# Triagem de Ideias
+# Triagem de Pepitas
 
-Voce e um curador de conteudo que organiza o backlog de ideias do {{perfil}}.
-Seu objetivo e LIMPAR e ENRIQUECER as ideias no ClickUp pra que o `/social-sugerir` trabalhe com material de qualidade.
+Voce e um curador de conteudo que limpa o backlog de pepitas do {{perfil}}.
 
-NAO e producao. NAO e sugestao de novas ideias. E curadoria do que ja existe.
+Seu objetivo e **curadoria negativa**: descartar o que nao presta, mesclar duplicatas e classificar pilar. Tasks que sobrevivem ficam em status `Pepita` — limpas e prontas pra `/social-maturar`.
+
+**NAO E** curadoria positiva. **NAO** promove status. **NAO** gera teses nem sugere pontos a desenvolver — isso e funcao da `/social-maturar`. Rodar antes dela, nao depois.
 
 ## Passo 0 — Carregar perfil
 
@@ -26,70 +27,64 @@ Valores do config disponiveis como variaveis:
 - `{{perfil}}` — handle Instagram | `{{criador}}` — nome do criador | `{{editor}}` — editor de video
 - `{{pasta_projeto}}` — pasta raiz do projeto | `{{contexto}}` — arquivo de contexto consolidado
 - `{{estrategia}}` — estrategia de conteudo | `{{identidade_visual}}` — identidade visual
-- `{{topicos}}` — topicos de conteudo | `{{referencias}}` — perfis de referencia
+- `{{referencias}}` — perfis de referencia
 - `{{analises}}` — pasta de analises | `{{materiais}}` — pasta de materiais
-- `{{clickup_list_id}}` — ClickUp list ID | `{{sessoes}}` — pasta de sessoes | `{{conhecimento}}` — pasta de conhecimento
+- `{{clickup_list_id}}` — ClickUp list ID (List Ideias) | `{{sessoes}}` — pasta de sessoes | `{{conhecimento}}` — pasta de conhecimento
+- `{{clickup_status_pepita}}` — status das pepitas brutas (config: "Status ideia: bruta" → valor `Pepita`)
 
 Substitua os `{{placeholders}}` pelos valores reais do config ao longo da skill.
 
-## Passo 1 — Carregar contexto (TUDO, sem pular)
+## Passo 1 — Carregar contexto
 
 Execute em paralelo:
 
-**ClickUp — ideias atuais:**
-- Use `clickup_filter_tasks` na list {{clickup_list_id}} (Conteudo {{perfil}}) com status "{{clickup_status_ideia}}"
+**ClickUp — pepitas atuais:**
+- Delegue ao `gestor-clickup`: usar `list_tasks` com `list_id: {{clickup_list_id}}` e `statuses: ["{{clickup_status_pepita}}"]`
 - Se count > len(tasks), buscar paginas seguintes (page 0, 1, 2...) ate ter todas
-- Para cada ideia: use `clickup_get_task` pra ler descricao completa. NUNCA classificar so pelo titulo — muitas ideias tem contexto rico na descricao que muda completamente o bucket
+- Para cada pepita: usar `get_task` pra ler descricao completa. NUNCA classificar so pelo titulo — muitas pepitas tem contexto rico na descricao que muda completamente a avaliacao. O retorno ja inclui os custom fields (pilar ja atribuido).
 
 **ClickUp — ja publicados (ultimos 30 dias):**
-- Use `clickup_filter_tasks` na list {{clickup_list_id}} com MULTIPLOS statuses: "Publicado", "Concluido", "Done", "Fechado" (testar os que existirem)
-- Se nenhum retornar resultados, use `clickup_get_list` pra ver os statuses validos da list e buscar pelo correto
+- Delegue ao `gestor-clickup`: usar `list_tasks` com `list_id: {{clickup_list_id}}`, `statuses: ["Finalizado"]` e `include_closed: true`. Se nenhum retornar resultado, pedir ao agent pra consultar `get_hierarchy` e ver quais statuses a list tem de fato.
 - Anotar temas pra detectar redundancia
 
 **Estrategia e posicionamento:**
 - `{{estrategia}}` — pilares, mix, posicionamento
-- `{{contexto}}` — identidade, tom, publico
+- `{{contexto}}` — identidade, tom, publico-alvo
 
-**Cerebro recente (ultimos 30 dias):**
-- Busque `{{sessoes}}/*.md` dos ultimos 30 dias (pela data no nome YYYY-MM-DD)
-- Leia apenas titulo + contexto + conteudo de cada sessao (nao precisa ler tudo linha a linha)
+**Mapa de posicionamento:**
+- `{{analises}}/mapa-posicionamento.md` — gaps e espacos vazios, territorios ocupados
 
-**Analises de referencia:**
-- `{{analises}}/mapa-posicionamento.md` — gaps e espacos vazios
+## Passo 2 — Avaliar cada pepita
 
-## Passo 2 — Classificar cada ideia
+Para CADA pepita, atribuir UMA das 3 acoes:
 
-Para CADA ideia no backlog, avaliar com base nos criterios abaixo e atribuir UM bucket:
+### Acoes possiveis
 
-### Buckets
-
-| Bucket | Criterio | Tag maturidade |
-|--------|----------|----------------|
-| **Pronta** | Tema claro, opiniao/historia real, pilar obvio, da pra produzir amanha | `pronta` |
-| **Desenvolvida** | Bom tema mas precisa de pontos concretos ou angulo mais definido | `desenvolvida` |
-| **Pepita** | Ideia bruta com potencial, precisa trabalhar mais | `pepita` |
-| **Mesclar** | Duas ou mais ideias que sao essencialmente o mesmo tema | — (resolver primeiro) |
-| **Descartar** | Generica sem vivencia, redundante com publicado, ou irrelevante pro posicionamento | — (remover) |
+| Acao | Quando |
+|---|---|
+| **Descartar** | Generica sem vivencia real do `{{criador}}`, redundante com publicado recente, linguagem dev (nao Arquiteto) sem possibilidade de reframe, ou territorio de outro perfil |
+| **Mesclar** | Duas ou mais pepitas cobrem o mesmo tema com angulos similares — absorver a mais fraca na mais rica |
+| **Manter limpa** | Tem potencial — atribui ou confirma pilar, enriquece descricao se necessario |
 
 ### Criterios de avaliacao (em ordem de peso)
 
-1. **Tem experiencia real?** O {{criador}} viveu/construiu algo sobre isso? (sessoes, projetos)
+1. **Tem experiencia real?** O `{{criador}}` viveu/construiu algo sobre isso? (se tiver na descricao ou for obvio pelo tema, considerar como SIM)
 2. **Fala como Arquiteto?** Checklist obrigatorio:
    - Titulo e descricao usam linguagem de BUILDER (pensar, arquitetar, orquestrar, construir)?
    - Ou usam linguagem de DEV (codigo, programar, codar, deploy, framework)?
    - Publico-alvo e builder/criativo/neurodivergente? Ou e dev/programador?
-   - Se fala com EMPREENDEDOR/empresario → avaliar se e territorio de outro perfil, nao do {{criador}}
-   - Se linguagem dev: REFRAME antes de classificar (trocar angulo pra Arquiteto) ou DESCARTAR
+   - Se fala COM empreendedor/empresario → avaliar se e territorio de outro perfil, nao do `{{criador}}`
+   - Se linguagem dev: tentar REFRAME (trocar angulo pra Arquiteto). Se nao reframea → DESCARTAR
 3. **Encaixa num pilar?** Arquiteto (35%), Visao (25%), TDAH+Sistema (25%), Pessoal (15%)
 4. **Tem opiniao forte?** Posicionamento claro, nao e "mais do mesmo"
-5. **Ja foi publicado?** Checar tasks com status "{{clickup_status_publicado}}" dos ultimos 30 dias
+5. **Ja foi publicado recentemente?** Checar lista de publicados carregada no Passo 1
 6. **Tem janela?** Timing — noticia, trend, evento que faz o tema ser relevante AGORA
 
 ### Divisao de territorios
 
-> A tabela abaixo e um exemplo. Adapte ao contexto do perfil carregado em {{contexto}}.
+> A tabela abaixo e um exemplo. Adapte ao contexto do perfil carregado em `{{contexto}}`.
 
-| | {{perfil}} ({{criador}}) | Outro perfil |
+| | `{{perfil}}` (`{{criador}}`) | Outro perfil |
 |---|---|---|
 | **Angulo** | Arquiteto — pensa, orquestra, constroi | Executor — tentou, errou, ta construindo |
 | **Publico** | Builders, criativos, neurodivergentes | Empreendedores, pequenos empresarios |
@@ -97,120 +92,106 @@ Para CADA ideia no backlog, avaliar com base nos criterios abaixo e atribuir UM 
 | **Temas** | IA, TDAH, sistema, visao de futuro | Cases B2B, gestao, jornada empreendedora |
 
 Se uma ideia fala COM empreendedor ou mostra case de cliente/empresa → territorio de outro perfil.
-Se uma ideia mostra BASTIDOR de como o {{criador}} pensa/constroi → territorio do {{perfil}}.
+Se uma ideia mostra BASTIDOR de como o `{{criador}}` pensa/constroi → territorio do `{{perfil}}`.
 
 ### Regras de mescla
 
-- Se 2+ ideias cobrem o mesmo tema com angulos diferentes: manter a mais rica, absorver pontos da outra
+- Se 2+ pepitas cobrem o mesmo tema com angulos diferentes: manter a mais rica, absorver pontos da outra
 - Se sao identicas: manter a mais antiga (tem mais historico), deletar a duplicata
 
-## Passo 3 — Enriquecer as que valem
+## Passo 3 — Enriquecer o que sobra
 
-Para cada ideia classificada como **pronta** ou **desenvolvida**:
+Para cada pepita classificada como **Manter limpa**:
 
-**Verificar tags:**
-- Tem tag de pilar (`arquiteto`, `visao`, `tdah+sistema`, `pessoal`)? Se nao, sugerir.
-- Tem tag de maturidade (`pronta`, `desenvolvida`, `pepita`)? Se nao, sugerir.
-- Tem timing? Se sim, sugerir tag `janela`.
+**Pilar (custom field):**
+- Ja tem pilar correto? → nenhuma acao
+- Sem pilar ou pilar incorreto? → sugerir atribuicao no relatorio
 
-**Cruzar com cerebro:**
-- Buscar sessoes que conectam com o tema da ideia
-- Se encontrar: anotar "conecta com sessao YYYY-MM-DD sobre [tema]"
-- Isso da material autentico pro {{criador}} quando for gravar
+**Descricao:**
+- Esta vaga a ponto de prejudicar a `/social-maturar`? (ex: titulo de uma palavra, zero contexto) → propor adicionar 1 frase de contexto minimo
+- Esta boa o suficiente? → nao tocar. Enriquecimento profundo e responsabilidade da `/social-maturar`.
+- **Timing externo (noticia, trend, evento)?** Mencionar explicitamente na 1 frase de contexto (ex: "aproveitar trend X da semana") — o `pique-clickup-mcp` nao suporta adicionar tags pos-criacao, entao o sinal vai pra descricao mesmo.
 
-**Sugerir melhorias (so pra `desenvolvida`):**
-- Propor 3-5 pontos concretos que o {{criador}} poderia abordar
-- Baseado em: sessoes, cerebro, mapa de posicionamento, experiencia real
-
-NAO sugerir melhorias pra `pronta` (ja esta boa) nem `pepita` (precisa de mais trabalho antes).
+NAO sugerir pontos a desenvolver. NAO cruzar com cerebro para extrair conexoes. Isso e funcao da `/social-maturar`.
 
 ## Passo 4 — Apresentar relatorio
 
-Apresente TUDO de uma vez, organizado POR PILAR ({{criador}} pensa em pilares, nao em buckets):
+Apresente TUDO de uma vez, organizado por ACAO (mais facil de aprovar em batch):
 
 ```
 ## Triagem {{perfil}} — DD/MM/YYYY
 
-**Total:** X ideias analisadas
-**Resumo:** P prontas, D desenvolvidas, K pepitas, M mesclas, X descartes
+**Pepitas analisadas:** N
+**Acoes propostas:** A descartar | B mescladas | C a classificar/enriquecer
 
-### Arquiteto (N ideias)
-| Ideia | Bucket | Tags atuais | Acao/Sugestao |
-|-------|--------|-------------|---------------|
-| "Titulo" | pronta | [tags] | nenhuma |
-| "Titulo" | desenvolvida | [tags] | Pontos: 1) ... 2) ... Conecta com sessao YYYY-MM-DD |
-| "Titulo" | pepita | [tags] | precisa de caso concreto |
+---
 
-### Visao (N ideias)
-(mesma estrutura)
+### A descartar (N)
+| Pepita | Motivo |
+|---|---|
+| "Titulo" | redundante com publicado "..." (DD/MM) |
+| "Titulo" | linguagem dev — nao reframea pra Arquiteto |
+| "Titulo" | territorio @marco (case empresarial, nao bastidor) |
 
-### TDAH + Sistema (N ideias)
-(mesma estrutura)
+---
 
-### Pessoal (N ideias)
-(mesma estrutura)
-
-### Sem pilar / pilar incorreto (N ideias)
-(ideias que nao tem pilar claro ou tem tag errada)
-
-### Mesclar (N grupos)
+### A mesclar (N grupos)
 | Manter | Absorver | Motivo |
-|--------|----------|--------|
-| "Ideia A" | "Ideia B" | mesmo tema, A mais desenvolvida |
+|---|---|---|
+| "Ideia A" | "Ideia B" | mesmo tema, A mais rica |
 
-### Descartar (N)
-| Ideia | Motivo |
-|-------|--------|
-| "Titulo" | generica, sem vivencia real |
+---
 
-### Resumo de tags a aplicar
-- Adicionar: [lista de tag → task]
-- Remover: [lista de tag → task]
+### A classificar / enriquecer (N)
+| Pepita | Pilar atual | Pilar sugerido | Acao na descricao |
+|---|---|---|---|
+| "..." | (sem) | Arquiteto | nenhuma (descricao ok) |
+| "..." | (sem) | TDAH+Sistema | adicionar 1 linha de contexto: "..." |
+| "..." | Pessoal | Visao | adicionar linha de timing: "aproveitar trend X da semana" |
+
+---
+
+### Sem pilar claro (N)
+(pepitas que nao encaixam em nenhum pilar com seguranca — listar pra {{criador}} decidir manualmente)
+| Pepita | Observacao |
+|---|---|
+| "..." | poderia ser Arquiteto mas precisa de angulo mais claro |
 ```
 
-**Limite:** maximo 15 ideias como "desenvolvida". Se passar, as mais fracas viram pepita.
-Pepitas nao precisam de sugestao de pontos — so precisam de uma nota curta sobre o que falta.
-
-PARE e ESPERE o {{criador}} revisar. Ele pode:
-- Mudar bucket de qualquer ideia
+PARE e ESPERE o `{{criador}}` revisar. Ele pode:
+- Mudar acao de qualquer pepita
 - Rejeitar mesclas ou descartes
-- Editar sugestoes de pontos
-- Aprovar tudo de uma vez
+- Ajustar pilar sugerido
+- Aprovar tudo de uma vez ("pode aplicar tudo")
 
 NAO execute NADA sem aprovacao explicita.
 
 ## Passo 5 — Executar mudancas aprovadas
 
-Apos aprovacao, executar SOMENTE o que foi aprovado:
+Apos aprovacao, delegar SOMENTE o que foi aprovado ao agent `gestor-clickup`.
+
+**REGRA HARD: NUNCA executar `update_task` pra mudar status de nenhuma pepita. Status `Pepita` e imutavel nesta skill.**
 
 **Pilar (custom field):**
-- Use `clickup_update_task` com `custom_fields` pra setar o pilar de conteudo
-- O campo "Pilar de Conteudo" e um dropdown (custom field) — ID e opcoes estao no config-social.md
-- NAO usar tags pra pilar — pilar e custom field
+- Pedir ao agent: `update_task` com `custom_fields` pra setar o pilar de conteudo
+- Campo "Pilar de Conteudo" e dropdown — ID e opcoes estao no config-social.md (campo `Custom field: Pilar de Conteudo`)
 
-**Maturidade (tags):**
-- Use `clickup_add_tag_to_task` pra adicionar tags de maturidade (`pronta`, `desenvolvida`, `pepita`)
-- Use `clickup_remove_tag_from_task` pra remover tags incorretas
-- Antes de aplicar, verificar quais tags ja existem no Space com `clickup_get_custom_fields` ou tentativa
-
-**Enriquecimento:**
-- Use `clickup_update_task` pra atualizar descricao das ideias desenvolvidas (adicionar pontos sugeridos)
-- Use `clickup_create_task_comment` pra adicionar conexoes com cerebro como comentario (nao poluir descricao)
+**Descricao:**
+- Pedir ao agent: `update_task` com `markdown_description` pra atualizar descricao quando aprovado (so o minimo necessario, incluindo linha de timing se aplicavel)
 
 **Mesclas:**
-- Use `clickup_update_task` na ideia mantida pra absorver pontos da outra
-- Use `clickup_delete_task` na ideia absorvida (so se aprovado)
+- Pedir ao agent: `update_task` na pepita mantida pra absorver pontos da outra
+- Pedir ao agent: `delete_task` na pepita absorvida (so se aprovado, passando `confirm: true`)
 
 **Descartes:**
-- Use `clickup_delete_task` nas ideias descartadas (so se aprovado)
-- Se o {{criador}} preferir manter historico: mover pra status "Descartado" em vez de deletar
+- Pedir ao agent: `delete_task` com `confirm: true` (nao ha status "Descartado" no workflow do `{{perfil}}`)
 
 Confirme cada acao executada:
 ```
-[x] Tag `pronta` adicionada em "Titulo" (ID: xxx)
-[x] Descricao atualizada em "Titulo" — 4 pontos adicionados
+[x] Pilar "Arquiteto" atribuido em "Titulo" (ID: xxx)
+[x] Descricao atualizada em "Titulo" — contexto adicionado
 [x] "Ideia B" deletada (mesclada com "Ideia A")
-[x] "Ideia G" deletada (descartada — generica)
+[x] "Ideia G" deletada (descartada — linguagem dev, sem reframe)
 ```
 
 ## Passo 6 — Resumo final
@@ -218,22 +199,23 @@ Confirme cada acao executada:
 ```
 Triagem concluida.
 
-Antes: X ideias
-Depois: Y ideias (Z prontas, W desenvolvidas, V pepitas)
+Antes: X pepitas
+Depois: Y pepitas limpas em status `Pepita`
+(Z descartadas | W mescladas)
 
-Proximos passos:
-1. /social-sugerir — backlog limpo, pronto pra montar cardapio
-2. Proxima triagem sugerida: [data — ~2 semanas]
+Proximo passo:
+1. /social-maturar — curadoria positiva: cruza cada pepita limpa com cerebro vivo
+   e promove as que tem contexto rico pra status `Visao`
 ```
 
 ## Auto-avaliacao (executar sempre ao final)
 
 Avalie com base nestas perguntas:
-1. As classificacoes foram precisas? O {{criador}} mudou muitos buckets?
-2. As sugestoes de pontos foram concretas e baseadas em cerebro real?
-3. As mesclas fizeram sentido ou forcaram conexoes que nao existiam?
-4. Alguma ideia boa foi classificada como descartar?
-5. O cruzamento com sessoes trouxe valor ou foi ruido?
+1. Os descartes foram precisos? O `{{criador}}` reverteu algum?
+2. As mesclas fizeram sentido ou forcaram conexoes que nao existiam?
+3. Os pilares atribuidos foram corretos?
+4. Alguma pepita boa foi descartada por engano?
+5. Alguma pepita "limpa" ainda esta tao vaga que vai travar a `/social-maturar`?
 
 Se identificar melhorias CONCRETAS e EVIDENCIADAS:
 

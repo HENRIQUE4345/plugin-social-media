@@ -102,7 +102,7 @@ ESPERE resposta. Se escolher **2**, pule pro Passo 2 normal. Se escolher **1**, 
 
 ### 1.5.1 — Listar videos em revisao
 
-Use `clickup_filter_tasks` com:
+Delegue ao `gestor-clickup`: `list_tasks` com:
 - `list_id`: `901326469110` (Studio → @iairique → Conteudo)
 - `statuses`: `["revisao"]`
 - `assignees`: `[48769703]` (Henrique)
@@ -127,21 +127,19 @@ Se **0 resultados**: informe "Nenhum video seu em revisao agora." e volte pro Pa
 
 ESPERE resposta com o numero.
 
-### 1.5.2 — Extrair link do Drive do ultimo comentario
+### 1.5.2 — Extrair link do Drive da descricao da task
 
-Apos escolha, use `clickup_get_task_comments` com o `task_id` escolhido.
+Apos escolha, delegue ao `gestor-clickup`: `get_task` com o `task_id` escolhido.
 
-- Pegue o **ultimo comentario** (mais recente)
-- Procure a primeira URL `drive.google.com` via regex: `https?://drive\.google\.com/[^\s)]+`
-- Se nao achar no ultimo, tente os **3 comentarios mais recentes**
-- Se nao achar em nenhum:
+- No `markdown_description` retornado, procure a primeira URL `drive.google.com` via regex: `https?://drive\.google\.com/[^\s)]+`
+- Se nao achar:
   ```
-  Nao achei link do Drive nos ultimos comentarios da task.
+  Nao achei link do Drive na descricao da task.
   Cola o link aqui ou me manda o MP4 direto.
   ```
   ESPERE.
 
-**Obs:** hoje o combinado com o Gabriel e colocar o link do Drive no comentario ao mover pra `Revisao`. Se no futuro virar custom field "Link Revisao", ler o campo direto antes de cair nos comentarios.
+**Obs:** o `pique-clickup-mcp` nao expoe leitura de comentarios. Convencao nova: Gabriel cola o link do Drive na **descricao** da task (secao dedicada tipo `## Link do Drive`) ao mover pra `Revisao`, nao em comentario. Se encontrar task antiga sem link na descricao, pedir pro usuario colar manualmente.
 
 ### 1.5.3 — Baixar o video do Drive
 

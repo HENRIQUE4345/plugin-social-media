@@ -90,16 +90,26 @@ B) Sim — mas nao sei o ID (vou buscar pra voce)
 C) Nao uso ClickUp
 ```
 
-- **A:** Use o ID fornecido. Verifique com `clickup_get_list` se existe.
-- **B:** Use `clickup_get_workspace_hierarchy` para listar Spaces e ajude o usuario a encontrar a list correta. Mostre as options e ESPERE.
+- **A:** Use o ID fornecido. Delegue ao `gestor-clickup` pra verificar se existe via `get_hierarchy` (procure a list no retorno).
+- **B:** Delegue ao `gestor-clickup`: `get_hierarchy` (sem args) retorna todos os Spaces → Folders → Lists com statuses. Mostre as options e ESPERE o usuario escolher.
 - **C:** Deixe campos de ClickUp vazios no config.
 
-Se encontrar a list, tente detectar os statuses validos (via `clickup_get_list`) para preencher os campos de status.
+Se encontrar a list, os statuses validos ja aparecem no `get_hierarchy` — use-os pra preencher os campos de status do config.
 
-Apos encontrar a list, use `clickup_get_custom_fields` com o list_id pra descobrir custom fields. Procure por:
-- Campo tipo `drop_down` com nome parecido com "pilar" ou "conteudo" → salvar ID do campo + IDs de cada opcao
-- Campo tipo `drop_down` com nome parecido com "formato" → salvar ID do campo + IDs de cada opcao
-- Outros dropdowns relevantes
+**Custom fields (Pilar, Formato, etc):** o `pique-clickup-mcp` nao expoe uma tool pra listar custom fields de uma list. Opcoes:
+1. Se outro perfil ja tem config pronto, copie os IDs de la (`config-social.md` de outro perfil).
+2. Se for primeiro setup, peca ao usuario pra colar os IDs manualmente do ClickUp (Settings → Custom Fields da list). Estrutura esperada:
+   ```
+   Pilar de Conteudo: <field_id>
+     opcoes:
+       Arquiteto: <option_id>
+       Visao: <option_id>
+       ...
+   Formato: <field_id>
+     opcoes:
+       ...
+   ```
+3. Alternativa pratica: delegue ao `gestor-clickup` pra pegar uma task existente na list via `get_task` — o retorno inclui os custom fields ja preenchidos com IDs + valores, o que permite inferir a estrutura.
 
 Salvar os IDs no config (secao ClickUp) pra que outras skills usem via custom_fields em vez de tags.
 

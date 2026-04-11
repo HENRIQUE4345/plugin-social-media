@@ -117,8 +117,8 @@ Leia estes arquivos simultaneamente:
 - `{{analises}}/*cardapio*.md` — evitar repetir
 
 **ClickUp (ingredientes brutos):**
-- Use `clickup_filter_tasks` na list {{clickup_list_id}} com status "{{clickup_status_ideia}}" (as 20 mais recentes) — incluir `include_custom_fields: true` na chamada
-- Use `clickup_filter_tasks` com status "{{clickup_status_publicado}}" + include_closed (ultimos 14 dias) — pra NAO repetir
+- Delegue ao `gestor-clickup`: `list_tasks` com `list_id: {{clickup_list_id}}` e `statuses: ["{{clickup_status_ideia}}"]` (as 20 mais recentes) — o retorno ja inclui custom fields
+- Delegue ao `gestor-clickup`: `list_tasks` com `list_id: {{clickup_list_id}}`, `statuses: ["{{clickup_status_publicado}}"]`, `include_closed: true` e `due_date_gt` (14 dias atras) — pra NAO repetir
 
 **Attribution das ideias brutas (opcional, so se config tem os IDs):**
 
