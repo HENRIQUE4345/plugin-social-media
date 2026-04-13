@@ -89,20 +89,49 @@ Delegue ao `gestor-clickup`:
 
 - Read `{{pasta_projeto}}/linha-de-producao-conteudo.md` — secao "10 formatos" (ou equivalente). Usado pra sugerir formato por Visao.
 
-### 1.6 — Analises de concorrentes
+### 1.6 — Guia de conteudo + banco de ganchos (OBRIGATORIO)
+
+- Glob `{{pasta_projeto}}/**/guia-conteudo*.md` — se existir, Read integral.
+- Extrair: 4 fontes de conteudo, banco de ideias ja classificadas por esforco, **ganchos que funcionam** (categorias: Contrario, Numero, Provocacao, Curiosidade, Confissao, Segredo, Erro), hooks ja formulados com arco narrativo real.
+- Este arquivo e o MAIOR acelerador de hook-seed — nao pular.
+
+### 1.7 — Cortes ja gravados do proprio perfil (OBRIGATORIO)
+
+- Glob `{{analises}}/**cortes*.md` OU `{{analises}}/**ancora*.md` — identificar cortes ja gravados do `{{criador}}` com hook + pilar + nota A/B/C + transcricao.
+- Cada corte e **bruto potencial** pra virar conteudo editando, nao gravando do zero.
+- Mapear: corte -> tema/hook -> nota -> tempo bruto.
+
+### 1.8 — Status atual dos cortes no ClickUp (OBRIGATORIO se 1.7 rendeu)
+
+Pra cada corte identificado no 1.7, delegar ao `gestor-clickup`:
+- Buscar em List Producao, List Cortes (se houver), e List Ideias por tasks com hooks/temas correspondentes aos cortes.
+- Classificar cada corte em 3 estados:
+  - **Postado/Finalizado** -> nao usar como bruto (ja foi consumido; se Visao quiser re-abordar, registrar como angulo novo)
+  - **Em producao** (Editar/Revisar/Agendar) -> aguardar, nao sugerir editar
+  - **Livre** (sem task ou so em Pepita/Visao) -> disponivel pra edicao
+
+### 1.9 — Analises de concorrentes
 
 - Glob `{{analises}}/**/*.md` — identificar padroes/lentes/formulas empiricas aplicaveis
 - Priorizar: `mapa-posicionamento.md`, `padroes-*.md`, analises de perfis de referencia
+- **Exigir NUMERO** ao extrair formula (ex: "cultura pop reimaginada 27.4% ER em @diegoalmeida.ia" — nao apenas "cultura pop funciona")
 
-### 1.7 — Radar da semana (timing externo)
+### 1.10 — Radar da semana (timing externo)
 
 - Glob o arquivo mais recente em `{{pasta_projeto}}/radar/` OU `{{analises}}/radar/` — o que existir
 - Se nenhum radar encontrado: seguir sem (fonte C vira opcional)
 - Read o radar encontrado: trends quentes, noticias, eventos
 
-## Passo 2 — Cruzar cada pepita com as 4 fontes
+### 1.11 — Cardapios mensais (anti-repeticao ampliada)
 
-Pra CADA pepita, fazer busca targeted **dinamica**:
+- Glob `{{analises}}/**cardapio*.md` E `arquivo/**cardapio*.md`
+- Listar pepitas/Visoes ja mencionadas em cardapios anteriores — sinal de maturidade (nao de repeticao). Uma pepita que aparece em 2+ cardapios ja validou interesse do `{{criador}}`.
+
+## Passo 2 — Cruzar cada pepita com as 5 fontes
+
+Pra CADA pepita, fazer busca targeted **dinamica**.
+
+**REGRA ABSOLUTA — preservar descricao literal:** antes de sintetizar tese/angulo, COPIAR textualmente os trechos mais densos da descricao da pepita (lista de pontos, ganchos sugeridos, conexoes cruzadas ja registradas). A descricao original ja E trabalho do `{{criador}}` — nao re-interpretar em outras palavras, usar as palavras dele.
 
 ### Fonte A — Cerebro vivo (semente)
 
@@ -110,30 +139,38 @@ Extrair 2-4 keywords da pepita (titulo + descricao). Rodar Grep em:
 - `{{sessoes}}/**/*.md` — brainstorms, downloads, reunioes
 - `{{conhecimento}}/**/*.md` — aprendizados, frameworks, referencias
 - `{{pasta_projeto}}/**/*.md` — contexto do projeto especifico
+- `arquivo/**/*.md` — topicos, contexto v1, cardapios anteriores (muitas teses cristalizadas moram aqui)
+- `pique/sessoes/**/*.md` — brainstorms cruzados (ver especialmente `brainstorm-conteudo-cruzado*`)
 
-Pra cada match relevante, Read o trecho. **Capturar arquivo:linha especifico** — isso vira a semente verificavel. Aceitar como semente valida quando:
+Pra cada match relevante, Read o trecho. **Capturar arquivo:linha especifico** + **texto literal de 1 frase do cerebro** — isso vira a semente verificavel (vai pro brief SEM parafrasear). Aceitar como semente valida quando:
 - Trecho tem 3+ linhas de contexto do `{{criador}}` sobre o tema (nao so menciona a palavra)
 - E opiniao/framework/vivencia — nao apenas citacao externa
 
-### Fonte B — Analises (formula empirica)
+### Fonte B — Bruto gravado (cortes ja existentes)
 
-Buscar nas analises lidas no Passo 1.6 por:
-- Formulas de hook que funcionam pra angulos similares (ex: "revelacao contraintuitiva" pra pepita que ataca senso comum)
-- Lentes de analise aplicaveis (ex: "bastidor" vs "resultado" vs "antes/depois")
+Comparar a tese candidata com os cortes levantados no Passo 1.7:
+- **Match direto** (corte cobre exatamente a tese) -> registrar `bruto gravado: corte X (arquivo:linha, nota, status ClickUp)`. Formato sugerido vira "editar bruto", nao "gravar novo".
+- **Match adjacente** (corte tem pedaco da tese, nao cobre inteira) -> registrar como material complementar/teaser.
+- **Sem match** -> registrar "sem bruto, gravacao nova necessaria".
 
-Se nenhuma formula aplicavel for obvia, deixar esse bloco vazio — nao inventar.
+### Fonte C — Analises (formula empirica COM NUMERO)
 
-### Fonte C — Radar (timing)
+Buscar nas analises lidas no Passo 1.9 por formulas que funcionam pra angulos similares. **Nao aceitar formula sem numero**: exigir metrica (ex: "cultura pop reimaginada 27.4% ER em @diegoalmeida.ia", "posts opinativos 5-10x acima da media em 5/5 perfis", "@conrado 353k likes em arco vulnerabilidade→sistema").
+
+Se nenhuma formula com numero for obvia, deixar esse bloco como `"a validar em /social-sugerir"` — nao inventar.
+
+### Fonte D — Radar (timing)
 
 Checar se a pepita conecta com alguma trend/noticia/evento quente do radar:
-- Match forte → registrar `timing: quente — {tendencia X}`
+- Match forte → registrar `timing: quente — {tendencia X, expira em Y}`
 - Match fraco ou ausente → `timing: atemporal`
 
-### Fonte D — Historico (anti-repeticao)
+### Fonte E — Historico + cardapios (anti-repeticao / validacao)
 
-Comparar angulo candidato com titulos publicados (Passo 1.2) E Visoes existentes (Passo 1.3):
-- Angulo ja feito nas ultimas 4 semanas em publicado → `repetido: true` (sinaliza, nao bloqueia — `{{criador}}` decide se quer re-abordar)
-- Visao muito similar ja existe → sugerir mesclar com a Visao existente ao inves de criar nova (no relatorio)
+Comparar angulo candidato com:
+- Titulos publicados (Passo 1.2) → se ja feito ultimas 4 semanas, `repetido: true` (sinaliza, nao bloqueia)
+- Visoes existentes (Passo 1.3) → se muito similar, sugerir mesclar
+- Cardapios mensais (Passo 1.11) → se pepita ja apareceu em 2+ cardapios, registrar `validada pelo criador: sim` (positivo — reduz ansiedade de "pepita nova nao testada")
 
 ## Passo 3 — Classificar Caso A ou Caso B
 
@@ -144,31 +181,37 @@ Requer TODOS:
 2. Angulo nao trivialmente repetido (Fonte D)
 3. Cabe em UM pilar claro (o pilar ja vem do `/social-triagem` — nao re-classificar)
 
-Gerar **brief denso** com 7 blocos:
+Gerar **brief denso** com 8 blocos:
 
 ```markdown
+## Citacao da pepita
+> "[trecho literal da descricao original — preservar as palavras do {{criador}}, nao parafrasear. 2-4 linhas dos pontos mais densos]"
+
 ## Tese cristalizada
 [1-2 linhas. A afirmacao central que a Visao defende. Voz de {{criador}}.]
 
 ## Semente
-- `arquivo:linha` — [1 linha do que tem la]
+- `arquivo:linha` — "[texto literal de 1 frase do cerebro que sustenta a tese — nao parafrasear]"
 - (1-3 sementes. A primeira e a principal — vai no custom field Semente.)
 
 ## Angulo proposto
 [Como atacar o tema. 2-4 linhas. Ponto de entrada, antagonista, virada.]
 
+## Bruto existente
+[Se Fonte B rendeu match direto/adjacente: "corte X (arquivo:linha, nota A/B/C, status ClickUp: livre/em producao/postado)". Se match direto + livre: formato vira "editar bruto". Se sem match: "nao ha bruto, gravacao nova necessaria"]
+
 ## Formato sugerido
-[UM formato do catalogo — YouTube | Solo | Dividida | Peguei Gravei | Carrossel]
-**Por que:** [1 linha justificando — match com formula empirica + tom]
+[UM formato do catalogo — YouTube | Solo | Dividida | Peguei Gravei | Carrossel | EDITAR BRUTO existente]
+**Por que:** [1 linha justificando — match com formula empirica + tom + disponibilidade de bruto]
 
 ## Hook-seed
-[Uma frase inicial testavel. Nao e copy final — e direcao.]
+[Uma frase inicial testavel. Se ha bruto, usar fala literal do proprio {{criador}} transcrita no corte (arquivo:linha da transcricao). Senao, direcao testavel.]
 
 ## Formula empirica validada
-[Se Fonte B rendeu: nome da formula + analise:linha. Se nao: "a validar em `/social-sugerir`"]
+[Se Fonte C rendeu COM NUMERO: nome da formula + metrica + analise:linha. Se nao: "a validar em `/social-sugerir`". NAO aceitar formula sem numero.]
 
 ## Timing
-Quente — {tendencia X da semana, expira em {prazo}} | Atemporal
+Quente — {tendencia X, expira em Y} | Atemporal | Validada em N cardapios (se Fonte E acusou)
 ```
 
 ### Caso B — Sem contexto rico (mantem em `Pepita`)
@@ -191,12 +234,15 @@ Quando falha em qualquer requisito do Caso A (principalmente Fonte A vazia). Out
 
 ### A — Promover pra Visao (X)
 
-#### 1. "[titulo pepita]" (ID: xxx)
+#### 1. "[titulo pepita]" (ID: xxx) [FLAG: BRUTO GRAVADO / BRUTO ADJACENTE / — ]
+- **Citacao:** *"[trecho literal da descricao original]"*
 - **Tese:** [...]
-- **Semente principal:** `arquivo:linha` — [trecho 1 linha]
+- **Semente principal:** `arquivo:linha` — "[texto literal cerebro]"
 - **Angulo:** [...]
+- **Bruto:** [corte X, nota, status ClickUp] ou "nao ha bruto"
 - **Formato sugerido:** [...]
 - **Hook-seed:** "[...]"
+- **Formula (com numero):** [...]
 - **Timing:** [...]
 
 #### 2. "[titulo pepita]" (ID: xxx)
@@ -261,6 +307,21 @@ Pra cada pepita:
 [x] "Titulo" mantida em Pepita — tag precisa-contexto + comentario
 ```
 
+### Auditoria pos-update (OBRIGATORIA)
+
+**NUNCA confiar em "sucesso reportado" pelo agent.** Apos executar todos os updates, delegar ao `gestor-clickup`:
+
+1. `get_task` de CADA task promovida pra Visao
+2. Validar que `custom_fields` tem valores reais — especificamente `{{cf_semente_id}}` nao-vazio
+3. Validar que `status` = `{{clickup_status_visao}}`
+4. Validar que `markdown_description` contem o brief dos 8 blocos
+
+Se alguma validacao falhar:
+- **Semente vazia apos update** -> LIMITACAO CONHECIDA do `pique-clickup-mcp`: o `update_task` nao expoe `custom_fields` (apenas `create_task_full` expoe). Reportar explicitamente: "semente gravada no brief markdown mas NAO no custom field — bug do MCP". Propor: (a) fix no `pique-clickup-mcp`, (b) preenchimento manual, (c) ignorar por agora. NAO esconder o problema no resumo final.
+- **Status errado / brief errado** -> re-tentar update daquela task especifica.
+
+So ir pro Passo 6 depois de auditar.
+
 ## Passo 6 — Resumo final
 
 ```
@@ -282,9 +343,13 @@ Avalie com base nestas perguntas:
 
 1. **Taxa Caso A/B bateu expectativa?** T1.2 espera >=50% virando Visao. Se ficou muito abaixo, o filtro de Caso A esta severo demais — ou o cerebro realmente esta seco e precisa de rodada de downloads antes.
 2. **Sementes foram verificaveis?** O `{{criador}}` conseguiu abrir cada `arquivo:linha` citado e confirmar que o trecho sustenta a tese?
-3. **Angulos foram genuinamente novos?** Alguma Visao criada ja tinha Visao-irma cobrindo angulo identico? (Fonte D falhou?)
-4. **Formato sugerido foi coerente?** `{{criador}}` mudou o formato sugerido em >30% das Visoes? Se sim, heuristica de "formula empirica -> formato" precisa ajuste.
-5. **Brief denso estava acionavel?** Ao olhar uma Visao criada, `/social-sugerir` vai conseguir clonar angulos especificos sem precisar re-pesquisar cerebro?
+3. **Descricao literal da pepita foi preservada?** Brief citou texto literal ou re-interpretou em outras palavras? Re-interpretar e falha grave — a descricao ja E trabalho do criador.
+4. **Cortes gravados foram cruzados?** Alguma Visao teve corte com nota A/B direto ou adjacente ignorado? Se sim, Fonte B falhou — recomendacao de formato virou "gravar novo" quando deveria ser "editar bruto".
+5. **Formulas tiveram NUMERO?** Todas as formulas empiricas citadas tem metrica (ER%, likes, multiplicador)? Formulas genericas sem numero sao cheiro de brief raso.
+6. **Angulos foram genuinamente novos?** Alguma Visao criada ja tinha Visao-irma cobrindo angulo identico? (Fonte E falhou?)
+7. **Formato sugerido foi coerente?** `{{criador}}` mudou o formato sugerido em >30% das Visoes? Se sim, heuristica "formula empirica + disponibilidade de bruto -> formato" precisa ajuste.
+8. **Auditoria pos-update confirmou gravacao real?** `get_task` pos-update validou que `custom_fields` tem valor, ou o agent reportou sucesso falso por limitacao de tooling nao detectada?
+9. **Brief denso estava acionavel?** Ao olhar uma Visao criada, `/social-sugerir` vai conseguir clonar angulos especificos sem precisar re-pesquisar cerebro?
 
 Se identificar melhorias CONCRETAS e EVIDENCIADAS:
 
