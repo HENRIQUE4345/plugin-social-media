@@ -1,7 +1,7 @@
 {
   "name": "plugin-social-media",
-  "version": "1.2.0",
-  "description": "Gestao completa de conteudo para Instagram — analise de concorrentes, planejamento, producao de carrossel, radar de tendencias, triagem de backlog.",
+  "version": "1.4.0",
+  "description": "Gestao completa de conteudo para Instagram — analise de concorrentes, planejamento, producao de carrossel, radar de tendencias, triagem de backlog, pesquisa tematica pre-criacao (/social-pesquisar).",
   "author": {
     "name": "Henrique Carvalho"
   },

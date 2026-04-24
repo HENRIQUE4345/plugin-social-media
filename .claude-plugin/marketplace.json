@@ -7,7 +7,7 @@
     {
       "name": "plugin-social-media",
       "source": "./",
-      "description": "Gestao completa de conteudo para Instagram — analise, planejamento, producao, radar, triagem."
+      "description": "Gestao completa de conteudo para Instagram — analise, planejamento, producao, radar, triagem, pesquisa tematica pre-criacao."
     }
   ]
 }
