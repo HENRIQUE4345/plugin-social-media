@@ -48,8 +48,25 @@ Valores do config disponiveis como variaveis:
 - `{{analises}}` — pasta de analises | `{{materiais}}` — pasta de materiais
 - `{{clickup_list_id}}` — ClickUp list ID | `{{sessoes}}` — pasta de sessoes | `{{conhecimento}}` — pasta de conhecimento
 - `{{cf_origem_id}}` — custom field ID Origem | `{{cf_semente_id}}` — custom field ID Semente (opcionais — usados no Passo 1 se presentes no config)
+- `{{cf_pilar_id}}` + valores por pilar — custom field ID Pilar de Conteudo (usado no Passo 8 sync ClickUp)
+- `{{cf_formato_id}}` + valores por formato (`Longo`, `Curto`, `Corte`, `Carrossel`, `Gravei Postei`) — custom field ID Formato (usado no Passo 8)
+- `{{cf_publicar_id}}` + label IDs (`Instagram`, `TikTok`, `Shorts`, `YouTube`) — custom field ID Publicar, multi-select (usado no Passo 8)
+- `{{cf_deadline_editor_id}}` — custom field ID Deadline Editor, date (usado no Passo 8)
+- `{{clickup_status_visao}}`, `{{clickup_status_planejado}}` — nomes dos statuses pro fluxo de transicao
 
 Substitua os `{{placeholders}}` pelos valores reais do config ao longo da skill.
+
+### 0.3 — Mapping Formato → Plataformas (tabela fixa)
+
+Este mapping e usado no Passo 3G (handoff) e no Passo 8 (sync ClickUp). NAO mudar sem atualizar `{{pasta_projeto}}/linha-de-producao-conteudo.md`.
+
+| Formato (ClickUp) | Sub-tipos que absorve | Publicar (array derivado) | Deadline Editor? |
+|---|---|---|---|
+| `Longo` | YouTube longo, Ancora solo, Ancora conversa, Podcast, Vlog | `[YouTube]` se YouTube; `[]` (vazio) se Ancora — nao publica direto | Sim se YouTube; Nao se Ancora |
+| `Curto` | Reel produzido (Solo/Dividida/Screencast) | `[Instagram, TikTok, Shorts]` | Sim |
+| `Corte` | Corte Motion, Corte Frame (derivados de Longo via `/social-cortes`) | `[Instagram, TikTok, Shorts]` | Sim |
+| `Carrossel` | Carrossel imagem, Carrossel video | `[Instagram, TikTok]` | Nao (criador produz com Claude Code) |
+| `Gravei Postei` | Peguei Gravei (celular cru, TikTok-era) | **`[Instagram]` APENAS** (regra explicita: Gravei Postei so vai pra Reel, nao TikTok nem Shorts) | Nao |
 
 **Observacao:** a variavel `{{topicos}}` foi removida. A fonte de opinioes do criador agora e o cerebro vivo (busca dinamica no Passo 2D), nao um arquivo-indice estatico.
 
@@ -558,6 +575,19 @@ Pra cada angulo, preencher os hints relevantes pro destino escolhido:
 | `gravacao-ancora-ponto` | `ponto_na_pauta` (numero), `cortes_esperados` (2-3) |
 | `corte-existente` | `sessao_fonte`, `trecho_alvo`, `angulo_especifico` |
 
+**Campos OBRIGATORIOS no handoff alem dos hints (novos em 21/04/2026):**
+
+- `formato` — enum do ClickUp (Longo / Curto / Corte / Carrossel / Gravei Postei). Derivar do `destino`:
+  - `gravacao-youtube` → `Longo`
+  - `gravacao-ancora-ponto` → task-mae Ancora e `Longo`; o ponto em si nao vira task ate gerar `Corte` via `/social-cortes`
+  - `reel-produzido` → `Curto`
+  - `carrossel` → `Carrossel`
+  - `tiktok-nativo` → `Gravei Postei`
+  - `corte-existente` → `Corte`
+- `plataformas` — array derivado automaticamente do mapping do Passo 0.3. Ex: `Curto → [Instagram, TikTok, Shorts]`; `Carrossel → [Instagram, TikTok]`; `Gravei Postei → [Instagram]`.
+
+Esses 2 campos sao OBRIGATORIOS em TODO brief de angulo — eles alimentam o Passo 8 (sync ClickUp) sem reinferir.
+
 **Material de apoio (`material_apoio[]`):**
 
 Lista de arquivos que o executor (`/social-copy` ou `/social-carrossel`) vai ler pra executar o brief. So caminhos ABSOLUTOS, so arquivos que alimentam DIRETAMENTE este angulo. Nao e lista generica.
@@ -609,8 +639,10 @@ Apresente CADA angulo como um **brief estruturado** com 7 blocos. Este e o CONTR
 - [caminho 2]
 - [caminho 3]
 
-**7. HANDOFF** (destino e hints — do Passo 3G)
+**7. HANDOFF** (destino, formato, plataformas, hints — do Passo 3G)
 - destino: [gravacao-youtube | gravacao-ancora-ponto | reel-produzido | carrossel | tiktok-nativo | corte-existente]
+- formato: [Longo | Curto | Corte | Carrossel | Gravei Postei] — valor do custom field ClickUp (OBRIGATORIO)
+- plataformas: [array] — derivado do mapping Passo 0.3, ex: ["Instagram", "TikTok", "Shorts"] (OBRIGATORIO)
 - hints:
   [campos especificos por destino — ver tabela do Passo 3G]
 
@@ -961,6 +993,8 @@ Busque `{{materiais}}/conteudo-*-content.json` do mes correspondente.
     "material_apoio": ["[caminho 1]", "[caminho 2]"],
     "handoff": {
       "destino": "carrossel|reel-produzido|tiktok-nativo|gravacao-youtube|gravacao-ancora-ponto|corte-existente",
+      "formato": "Longo|Curto|Corte|Carrossel|Gravei Postei",
+      "plataformas": ["Instagram", "TikTok", "Shorts"],
       "hints": { /* campos especificos por destino */ }
     },
     "atribuicao": {
@@ -997,15 +1031,110 @@ Salve apenas o markdown como antes.
 **IMPORTANTE:** Nao busque nem modifique nenhum arquivo HTML. Edite apenas o JSON.
 **IMPORTANTE:** Campos de copy (title, hook, briefing) ficam vazios no nivel raiz — `/social:copy` preenche depois lendo `brief.hook_seed` como ponto de partida.
 
-## Passo 8 — Proximos passos
+## Passo 8 — Sincronizar ClickUp (OBRIGATORIO)
+
+Esta e a etapa que garante que o cardapio vira operacao real. Sem esse passo, os angulos ficam flutuando fora do kanban de produção. **Nao encerrar a skill sem executar esse passo.**
+
+**Agent:** delegar ao `plugin-pique:gestor-clickup` (ou equivalente agent de ClickUp do projeto — conferir no config).
+
+### 8.1 — Classificar cada angulo aprovado
+
+Pra cada angulo do cardapio (incluindo pontos da Ancora que viram gravacao), decidir entre **TRANSICIONAR** ou **CRIAR NOVA**:
+
+- Se `atribuicao.semente` inclui referencia `ClickUp task #<id>` (ideia-clickup) → **TRANSICIONAR** a Visao existente pra Planejado
+- Senao → **CRIAR NOVA** task direto em status Planejado
+
+### 8.2 — Regra Visao → Planejado (transiciona, nao clona)
+
+Regra atualizada 21/04/2026 (supersedes antiga regra de "Visao = lente reusavel que clona"):
+- A Visao-mae TRANSICIONA pra `Planejado` (muda status na mesma task)
+- Enriquecer nome (verbo infinitivo) + descricao (brief denso) + custom fields
+- Se for necessario reusar o mesmo angulo em conteudo futuro, criar nova Pepita depois (nao clonar agora)
+
+### 8.3 — Campos obrigatorios em TODA task sincronizada
+
+| Campo | Fonte | Como preencher |
+|---|---|---|
+| `name` | Titulo do angulo | Verbo infinitivo (Gravar / Produzir / Escrever) + descricao curta |
+| `markdown_description` | Brief 8 blocos | Template abaixo com secoes obrigatorias `## Contexto / ## O que fazer / ## Criterio de pronto` |
+| `status` | Classificacao | `Planejado` |
+| `custom_fields[Pilar]` | `Pilar` do brief | ID do valor (Arquiteto / Visao / TDAH+Sistema / Pessoal) |
+| `custom_fields[Origem]` | `atribuicao.origem` | Radar se veio do radar; Cerebro se veio de framework/historia/sessao; IA-sugerir se e cruzamento sem seed direta |
+| `custom_fields[Semente]` | `atribuicao.semente` | Primeira entrada relevante (caminho:Llinha) OU `ClickUp <id>` se e transicao |
+| `custom_fields[Formato]` | `handoff.formato` | Longo / Curto / Corte / Carrossel / Gravei Postei |
+| `custom_fields[Publicar]` | `handoff.plataformas` | Array de labels — Instagram / TikTok / Shorts / YouTube |
+| `custom_fields[Deadline Editor]` | `due_date - 2 dias` | Preencher SO se formato = Curto ou Corte ou Longo-YouTube (formatos que Gabriel edita); pular pra Carrossel, Ancora, Gravei Postei |
+| `due_date` | Grade semanal publicacao | Conforme slot da grade (Seg Arq corte, Ter Visao corte, etc) |
+| `assignees` | Criador | Handle do criador (ex: `henrique`) |
+| `priority` | Urgencia radar | `urgent` se janela 24-48h; `high` se essa semana; `normal` TikTok lab; `low` slot livre RADAR |
+| `time_estimate_minutes` | Por formato | Longo=120, Curto=90, Carrossel=60, Gravei Postei=30, Corte=30 |
+| `work_type` | — | `pipeline` (conteudo recorrente) |
+
+### 8.4 — Template de descricao markdown
+
+```
+## Contexto
+
+[TESE do angulo — 2-3 linhas explicando a postura do criador]
+
+**Tendencia:** [referencia radar + fonte caminho:Llinha]
+**Visao propria:** [framework/historia/opiniao + trecho curto + fonte:Llinha]
+**Formula empirica:** [nome + metrica]
+
+## O que fazer
+
+[Descricao operacional da peca]
+
+**Hook seed:** [frase candidata]
+**Nivel negocio:** [direta|indireta|ambiente|nenhuma]
+**Como [produto] aparece:** [1 linha, se aplicavel]
+
+## Criterio de pronto
+
+- Peca [gravada/produzida] seguindo a tese
+- Publicada em [plataformas]
+- [Se tem Deadline Editor: Material bruto entregue ate DD/MM]
+
+---
+**Cardapio:** `[caminho do markdown salvo no Passo 7]`
+**Radar:** `[caminho do radar fonte]`
+```
+
+### 8.5 — Ordem de execucao
+
+1. Descobrir IDs via `get_custom_fields` se o config estiver incompleto
+2. Executar transicoes primeiro (menor risco — so muda status)
+3. Executar criacoes em lote
+4. Validar por amostragem: `get_task` em 2 tasks (1 transicao + 1 criacao)
+5. `list_tasks` com status Planejado e conferir que o total bate com a soma de transicoes + criacoes
+
+### 8.6 — Retrocompatibilidade
+
+Se o config do projeto NAO tem os IDs dos custom fields Formato/Publicar/Deadline Editor (projetos antigos ou outros perfis sem esse setup), a skill deve:
+- Avisar o criador: "Custom fields Formato/Publicar/Deadline Editor nao estao no config — sincronizacao salvara so os 3 ja conhecidos (Pilar, Origem, Semente)"
+- Executar sync parcial sem quebrar
+- Sugerir rodar `/social-setup` pra completar o config
+
+### 8.7 — Report ao criador
+
+Ao final, reportar no chat:
+- Quantas transicoes (/N)
+- Quantas criacoes (/M)
+- Link da list ClickUp
+- URLs das 2 tasks sample validadas
+- Qualquer erro ou task que ficou fora
+
+## Passo 9 — Proximos passos
 
 ```
 Cardapio salvo em [caminho markdown]
 Dashboard atualizado: {{materiais}}/conteudo-YYYY-MM-content.json (status: suggested)
+ClickUp sincronizado: [N transicoes + M criacoes em Planejado]
 
 Para visualizar:
   1. Abra o dashboard no browser (template em plugin-social-media/templates/dashboard-conteudo.html)
   2. Clique "Carregar dados" e selecione os 2 JSONs da pasta materiais
+  3. Ou abra a list Planejado no ClickUp
 
 Proximos passos:
 1. Gravar [YouTube/Ancora] sobre "[angulo]" (talking points listados)
@@ -1024,6 +1153,7 @@ Avalie com base nestas perguntas:
 4. O radar teve peso real (gerou angulos) ou so confirmou o que ja existia?
 5. A distribuicao de pilares ficou dentro da faixa (+-5%)?
 6. O usuario mudou muito? Se sim, onde o julgamento criativo falhou?
+7. O Passo 8 (sync ClickUp) rodou ate o fim? Todas as tasks em Planejado com 6 custom fields preenchidos (Pilar, Origem, Semente, Formato, Publicar, Deadline Editor quando aplicavel)?
 
 Se identificar melhorias CONCRETAS e EVIDENCIADAS:
 
